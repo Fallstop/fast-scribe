@@ -15,7 +15,6 @@ export type Message = {
     type: MessageTypes.INPUT_UPDATE,
     clientId: string,
     input: string,
-    cursorPosition: number,
 }
 
 

@@ -37,6 +37,7 @@
 		]
 	},
 	"dependencies": {
+		"sass-embedded": "^1.89.2",
 		"socket.io": "^4.8.1",
 		"socket.io-client": "^4.8.1",
 		"sveltekit-io": "^1.0.12"

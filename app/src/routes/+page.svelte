@@ -6,7 +6,7 @@
   function create() {}
 
   onMount(() => {
-    const socket = io("localhost:5173");
+    const socket = io("localhost:42069");
     socket.on("message", (message) => {
       console.log(message);
     });
