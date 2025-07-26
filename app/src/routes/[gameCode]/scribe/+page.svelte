@@ -121,7 +121,7 @@
     }
 
 
-    if (currentInput[currentInput.length - 1].toLowerCase() == "rick") {
+    if (currentInput[currentInput.length - 1]?.toLowerCase() == "rick") {
       goto("/rick");
     }
   }
