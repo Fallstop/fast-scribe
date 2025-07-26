@@ -42,7 +42,7 @@
     </AlertDialog.Header>
     <AlertDialog.Footer>
       <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-      <a href="/{gameId}/writer" class="inline-block">
+      <a href="/{gameId}/scribe" class="inline-block">
         <AlertDialog.Action>Start Game</AlertDialog.Action>
       </a>
     </AlertDialog.Footer>

@@ -1,11 +1,5 @@
-import { GameState, Message, MessageMap } from "common";
+import { GameState, Message, MessageHandlers } from "common";
 import { randomUUID } from "crypto";
-
-type MessageHandlers = {
-  [t in keyof MessageMap]?: (msg: MessageMap[t]) => void;
-};
-
-const assertNever = (value: never) => {};
 
 export const makeRoomManager = () => {
   const rooms = new Map<string, ReturnType<typeof makeRoom>>();
@@ -22,7 +16,7 @@ export const makeRoomManager = () => {
       return {
         on<T extends keyof MessageHandlers>(
           eventType: T,
-          handler: MessageHandlers[T]
+          handler: MessageHandlers[T],
         ) {
           connection[eventType] = handler;
         },
@@ -74,7 +68,7 @@ type StateObject =
 
 const makeRoom = (
   roomId: string,
-  connectionsMap: Map<string, MessageHandlers>
+  connectionsMap: Map<string, MessageHandlers>,
 ) => {
   let connections: string[] = [];
   let dictator: string | undefined;
@@ -181,7 +175,7 @@ const makeRoom = (
             "Final sentence to complete the game.".split(" "),
             "I lied.".split(" "),
             "This is a longer sentence that should be typed out completely.".split(
-              " "
+              " ",
             ),
             "Medium length sentence for the game.".split(" "),
             "Quick brown fox jumps over the lazy dog.".split(" "),

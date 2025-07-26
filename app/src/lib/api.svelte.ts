@@ -1,28 +1,28 @@
-import { gameState } from "./state.svelte";
 import { PUBLIC_API_URL } from "$env/static/public";
-import { type Message } from "common";
+import type { Message, MessageHandlers } from "common";
 
-let gameId = $state("");
+type ExtractPromise<T> = T extends Promise<infer U> ? U : T;
+export type WsClient = ExtractPromise<ReturnType<typeof createClient>>;
 
-let wsClient = $derived(
-  gameId != ""
-    ? new WebSocket(`ws://${PUBLIC_API_URL}/ws/${gameId}`)
-    : undefined
-);
+export const createClient = async (gameCode: string) => {
+  const socket = new WebSocket(`ws://${PUBLIC_API_URL}/ws/${gameCode}`);
+  const handlers: MessageHandlers = {};
 
-// $effect(() => {
-//     if (!wsClient) {
-//         return;
-//     }
+  await new Promise((res) =>
+    socket.addEventListener("open", () => {
+      res(undefined);
+    }),
+  );
 
-//     wsClient.addEventListener("message", onMessage);
-// })
+  const send = (message: Message) => {
+    socket.send(JSON.stringify(message));
+  };
 
-function send(msg: Message) {
-  wsClient?.send(JSON.stringify(msg));
-  console.log("sent: " + JSON.stringify(msg))
-}
+  socket.addEventListener("message", (msg) => {
+    if (typeof msg.data === "string") {
+      let json = JSON.parse(msg.data) as Message;
 
+<<<<<<< HEAD
 export function getGameId() {
   return gameId;
 }
@@ -39,82 +39,25 @@ export async function createGame(): Promise<string> {
   // post to the server
   let res = await fetch(`${location.protocol}//${PUBLIC_API_URL}/create-room`, {
     method: "POST",
+=======
+      // @ts-ignore
+      handlers[json.type]?.(json);
+    }
+>>>>>>> 56d1122 (The code is fucked but that's okay!)
   });
-  const data = (await res.json()) as { roomCode: string };
-  console.log(data);
-  return data.roomCode;
-}
 
-export function nextRound() {
-  send({
-    type: "next_round",
-  });
-}
-
-export async function joinGame(_gameId: string, scribe: boolean) {
-  gameId = _gameId;
-
-  // Check if the game ID is valid
-  if (!gameId || gameId.length < 5) {
-    throw new Error("Invalid game ID");
-  }
-
-  // Create or get a client ID for the game
-  let clientId =
-    localStorage.getItem(`clientId-${gameId}`) || generateClientId();
-  localStorage.setItem(`clientId-${gameId}`, clientId);
-
-  if (wsClient) {
-    wsClient.addEventListener("message", onMessage);
-    wsClient.addEventListener("open", () => {
-      send({
-        type: "connect",
-        role: scribe ? "scribe" : "dictator",
-      });
-      if (scribe) {
-          send({
-            type: "start_game",
-            duration: 60
-          })
-      }
-    });
-
-  } else {
-    console.log("SOMETHING WENT TERRIBLY WRONG");
-  }
-}
-
-export async function sendTypingUpdate(newText: string[]) {
-  send({
-    type: "current_state",
-    // value: gameState.currentInput[gameState.currentInput.length-1]
-    value: newText,
-  });
-}
-
-export async function setGameState() {
-  // gameState =
-}
-
-export async function typingUpdate(newText: string[]) {
-  gameState.currentInput[gameState.roundNumber] = newText;
-}
-
-// export async function getGameState() {
-//     // Get latest game state
-
-//     gameState.roundNumber = 0;
-//     gameState.currentInput = [];
-//     gameState.gameSentences = [
-//         "This is a test sentence.".split(" "),
-//         "Another sentence to type.".split(" "),
-//         "Yet another sentence for testing.".split(" "),
-//         "Final sentence to complete THE GAME.".split(" "),
-//         "I lied.".split(" "),
-//         "This is a longer sentence that should be typed out completely.".split(" "),
-//         "Medium length sentence for the game.".split(" "),
-//         "Quick brown fox jumps over the lazy dog.".split(" "),
-//         "Sphinx of black quartz, judge my vow.".split(" "),
-//         "Pack my box with five dozen liquor jugs.".split(" ")
-//     ];
-// }
+  return {
+    connect(role: "scribe" | "dictator") {
+      send({ type: "connect", role });
+    },
+    start(duration: number) {
+      send({ type: "start_game", duration });
+    },
+    on<T extends keyof MessageHandlers>(
+      message: T,
+      handler: MessageHandlers[T],
+    ) {
+      handlers[message] = handler;
+    },
+  };
+};

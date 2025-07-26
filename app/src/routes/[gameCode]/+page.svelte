@@ -1,16 +1,18 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import type { PageProps } from "./$types";
-  import { Input } from "$lib/components/ui/input";
   import TypingViewer from "$lib/components/TypingViewer.svelte";
   import { gameState } from "$lib/state.svelte";
-  import { joinGame, nextRound, sendTypingUpdate, typingUpdate } from "$lib/api.svelte";
-  import { json } from "@sveltejs/kit";
   import { receive, send } from "$lib/transistion";
   import { flip } from 'svelte/animate';
+  import { createClient, type WsClient } from '$lib/api.svelte';
+  import { onMount } from "svelte";
 
   const props: PageProps = $props();
   const gameCode = $derived(props.params.gameCode);
+  let hasScribe = $state(false);
+  let hasDictator = $state(false);
+  const ready = $derived(hasScribe && hasDictator);
+  let isPlaying = $state(false);
 
   let currentInput: string[] = $derived<string[]>(
     gameState.currentInput[gameState.roundNumber]
@@ -22,13 +24,33 @@
     }
   })
 
-  onMount(async () => {
-    // Initialize game state for the specific game code
-    await joinGame(gameCode, false);
+    let client: WsClient | undefined = $state(); 
+
+  onMount(() => {
+      createClient(gameCode).then((conn) => client = conn);
+  })
+
+  $effect(() => {
+     if (!client) {
+          return;
+      }
+
+      client.connect("dictator");
+      client.on("connect", (msg) => {
+        if (msg.role === "scribe") hasScribe = true;
+        if (msg.role === "dictator") hasDictator = true;
+      });
+      client.on("game_start", (msg) => {
+          isPlaying = true;
+      }) 
   });
 </script>
 
 <svelte:body />
+
+
+{#if client}
+{#if isPlaying}
 
 <div class="flex flex-col items-center justify-center h-screen">
   <h1 class="text-3xl font-bold mb-4">Fast Scribe (Dictator view!)</h1>
@@ -61,3 +83,9 @@
     currentText={gameState.currentInput[gameState.roundNumber] || []}
   /> -->
 </div>
+{:else}
+    <button disabled={ready} class="fill-emerald-400 disabled:fill-emerald-950" onclick={() => client.start(30)}>Start game</button>
+{/if}
+{:else}
+Loading fool
+{/if}

@@ -37,3 +37,6 @@ export type Message =
   | { type: "hello" };
 
 export type MessageMap = MapDiscriminatedUnion<Message, "type">;
+export type MessageHandlers = {
+  [t in keyof MessageMap]?: (msg: MessageMap[t]) => void;
+};
