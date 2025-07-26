@@ -44,7 +44,7 @@
   <p class="mb-8">debug data: {JSON.stringify(gameState.currentInput)} </p>
 
   <TypingViewer
-    targetText={gameState.targetText}
+    targetText={gameState.gameSentences[gameState.roundNumber] || []}
     currentText={gameState.currentInput}
   />
 </div>
