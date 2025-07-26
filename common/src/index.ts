@@ -25,8 +25,10 @@ export type Message =
         started: number;
         endsAt: number;
         endsIn: number;
+        roundNumber: number;
       };
     }
+  | { type: "set_round"; value: number }
   | { type: "words"; value: string[][] }
   | { type: "current_state"; value: string[] };
 
