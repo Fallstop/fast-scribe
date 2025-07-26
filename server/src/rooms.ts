@@ -11,6 +11,8 @@ export const makeRoomManager = () => {
       let id = randomUUID();
       let connection: MessageHandlers = {};
       connections.set(id, connection);
+      // Adhd
+      rooms.set(roomCode, room);
       room.addConnection(id);
 
       return {
@@ -106,7 +108,9 @@ const makeRoom = (
       }
     },
     getConnections: () => connections,
-    addConnection: (id: string) => connections.push(id),
+    addConnection: (id: string) => (
+      connections.push(id), console.log(connections)
+    ),
     getRoomId: () => roomId,
     getSize: () => connections.length,
     setDictator: (connectionId: string) => {
