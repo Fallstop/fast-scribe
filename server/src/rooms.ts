@@ -1,4 +1,4 @@
-import { Message, MessageMap } from "common";
+import { GameState, Message, MessageMap } from "common";
 import { randomUUID } from "crypto";
 import { UnsupportedPathError } from "hono/router";
 
@@ -86,6 +86,10 @@ export const makeRoomManager = () => {
   };
 };
 
+type StateObject =
+  | { inPlay: false }
+  | { inPlay: true; currentState: GameState };
+
 const makeRoom = (
   roomId: string,
   connectionsMap: Map<string, MessageHandlers>,
@@ -93,6 +97,10 @@ const makeRoom = (
   let connections: string[] = [];
   let dictator: string | undefined;
   let scribe: string | undefined;
+  let gameState = {
+    inPlay: false,
+  } as StateObject;
+
   let broadcast = (message: Message, sourceId?: string) => {
     for (const connection of connections) {
       let method = connectionsMap.get(connection)?.[message.type];
@@ -134,6 +142,63 @@ const makeRoom = (
       }
       scribe = connectionId;
       return true;
+    },
+    getGameState: () => gameState,
+    updateCurrentSentence: (connectionId: string, currentState: string[]) => {
+      if (!gameState.inPlay || connectionId !== scribe) {
+        return;
+      }
+
+      gameState.currentState.currentState = currentState;
+      broadcast({ type: "current_state", value: currentState }, connectionId);
+    },
+    nextRound: (connectionId: string) => {
+      if (!gameState.inPlay || connectionId !== scribe) {
+        return;
+      }
+
+      gameState.currentState.history.push(gameState.currentState.currentState);
+      gameState.currentState.currentState = [];
+      gameState.currentState.roundNumber += 1;
+
+      broadcast({ type: "game_state", ...gameState });
+    },
+    startRound: (connectionId: string, duration: number) => {
+      if (
+        gameState.inPlay ||
+        connectionId !== scribe ||
+        dictator === undefined
+      ) {
+        return;
+      }
+
+      let now = new Date();
+
+      gameState = {
+        inPlay: true,
+        currentState: {
+          currentState: [],
+          endsAt: now.getTime() + duration,
+          endsIn: duration,
+          history: [],
+          roundNumber: 0,
+          started: now.getTime(),
+          words: [
+            "This is a test sentence.".split(" "),
+            "Another sentence to type.".split(" "),
+            "Yet another sentence for testing.".split(" "),
+            "Final sentence to complete the game.".split(" "),
+            "I lied.".split(" "),
+            "This is a longer sentence that should be typed out completely.".split(
+              " ",
+            ),
+            "Medium length sentence for the game.".split(" "),
+            "Quick brown fox jumps over the lazy dog.".split(" "),
+            "Sphinx of black quartz, judge my vow.".split(" "),
+            "Pack my box with five dozen liquor jugs.".split(" "),
+          ],
+        },
+      };
     },
   };
 };

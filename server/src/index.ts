@@ -5,11 +5,14 @@ import { WSContext } from "hono/ws";
 import { nanoid } from "nanoid";
 import { makeRoomManager } from "./rooms";
 import { Message } from "common";
+import { cors } from 'hono/cors'
 
 const app = new Hono();
 const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app });
 
 const roomManager = makeRoomManager();
+
+app.use('*', cors())
 
 // Regular HTTP route
 app.get("/", (c) => c.text("Hello from Hono!"));
