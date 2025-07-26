@@ -28,7 +28,6 @@ import { flip } from 'svelte/animate';
     const key = event.key;
     console.log("Key pressed:", key);
 
-
     if (key === " ") {
       // Move to the next word, if the current word is not empty
       if (currentInput.length > 0 && currentInput[currentInput.length - 1].length > 0) {
@@ -41,19 +40,29 @@ import { flip } from 'svelte/animate';
       }
       currentInput[currentInput.length - 1] += key;
     } else if (key === "Backspace") {
-      // Remove last character from the current word
-      if (currentInput.length > 0 && currentInput[currentInput.length - 1].length > 0) {
-        currentInput[currentInput.length - 1] = currentInput[currentInput.length - 1].slice(0, -1);
-      } else if (gameState.currentInput.length > 0) {
-        currentInput.pop();
+      // Remove last full word if control is pressed
+      if (event.ctrlKey) {
+        if (currentInput[currentInput.length - 1].length >= 1) {
+          currentInput.pop();
+          currentInput.push("");
+        } else {
+          currentInput.pop();
+          currentInput.pop();
+          currentInput.push("");
+        }
+      } else {
+        // Remove last character from the current word
+        if (currentInput.length > 0 && currentInput[currentInput.length - 1].length > 0) {
+          currentInput[currentInput.length - 1] = currentInput[currentInput.length - 1].slice(0, -1);
+        } else if (gameState.currentInput.length > 0) {
+          currentInput.pop();
+        }
       }
     } else if (key === "Enter") {
       nextRound();
     }
 
     sendTypingUpdate(currentInput);
-    event.preventDefault();
-
   }
 
   onMount(async () => {

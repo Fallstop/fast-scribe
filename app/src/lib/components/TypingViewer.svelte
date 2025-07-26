@@ -4,6 +4,15 @@
     targetText: string[];
     active: boolean;
   }
+
+  let startTime: DOMHighResTimeStamp;
+  function startTimer() {
+    startTime = performance.now();
+  }
+  function endTimer(): DOMHighResTimeStamp {
+    return startTime - performance.now();
+  }
+
 </script>
 
 <script lang="ts">
