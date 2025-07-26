@@ -39,10 +39,8 @@
 		]
 	},
 	"dependencies": {
+		"@sveltejs/adapter-cloudflare": "^7.1.1",
 		"sass-embedded": "^1.89.2",
-		"socket.io": "^4.8.1",
-		"socket.io-client": "^4.8.1",
-		"svelte-qrcode": "^1.0.1",
-		"sveltekit-io": "^1.0.12"
+		"svelte-qrcode": "^1.0.1"
 	}
 }

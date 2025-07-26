@@ -4,6 +4,15 @@
     targetText: string[];
     active: boolean;
   }
+
+  let startTime: DOMHighResTimeStamp;
+  function startTimer() {
+    startTime = performance.now();
+  }
+  function endTimer(): DOMHighResTimeStamp {
+    return startTime - performance.now();
+  }
+
 </script>
 
 <script lang="ts">
@@ -78,14 +87,14 @@
     const lastWord = currentText[lastWordIndex];
 
     const cursorPosition: CursorPosition = {
-      x: 1,
+      x: 0,
       y: 0,
     };
 
     // calculate the distance covered
     combinedText.forEach((word, index) => {
       if (index < lastWordIndex) {
-        cursorPosition.x += word.length + 1; // +1 for space
+        cursorPosition.x += word.length +1; // +1 for space
       } else if (index === lastWordIndex) {
         cursorPosition.x += lastWord.length;
       }
@@ -96,15 +105,13 @@
 </script>
 
 <div
-  class="relative bg-secondary p-4 rounded-lg shadow-md text-2xl font-mono text-primary w-4xl"
+  class="relative font-mono"
   class:not-active={!active}>
  
   <span
     class="cursor"
-    class:hidden={currentText.length == 0 ||
-      (currentText.length == 1 && currentText[0].length == 0)}
-    style="transform: translateX({cursorPosition.current
-      .x}ch) translateY({cursorPosition.current.y}ch);"></span>
+    class:hidden={!active}
+    style="transform: translateX({cursorPosition.current.x+1}ch) translateY({cursorPosition.current.y}ch);"></span>
   {#each combinedText as word, wordIndex}
     <span class="word">
       {#each word.split("") as char, charIndex}
