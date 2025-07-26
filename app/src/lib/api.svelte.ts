@@ -59,6 +59,8 @@ export async function joinGame(_gameId: string) {
     ];
 }
 
+export async function sendTypingUpdate(newText: string[]) {
+}
 
 export async function typingUpdate(newText: string[]) {
     gameState.currentInput[gameState.roundNumber] = newText;

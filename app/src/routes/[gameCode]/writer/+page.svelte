@@ -4,7 +4,7 @@
   import { Input } from "$lib/components/ui/input";
   import TypingViewer from "$lib/components/TypingViewer.svelte";
   import { gameState } from "$lib/state.svelte";
-  import { joinGame, nextRound } from "$lib/api.svelte";
+  import { joinGame, nextRound, typingUpdate } from "$lib/api.svelte";
   import { json } from "@sveltejs/kit";
   const porps: PageProps = $props();
   const gameCode = $derived(porps.params.gameCode);
@@ -47,6 +47,8 @@
     } else if (key === "Enter") {
       nextRound();
     }
+
+    sendTypingUpdate(currentInput);
     event.preventDefault();
 
   }
@@ -67,8 +69,8 @@
   {#each gameState.gameSentences.slice(Math.max(gameState.roundNumber-1,0), gameState.roundNumber+2) as sentence, index}
     <TypingViewer
       targetText={sentence}
-      currentText={gameState.currentInput[index] || []}
-      
+      currentText={gameState.currentInput[gameState.roundNumber === 0 ? index  : index + gameState.roundNumber-1] || []}
+      active={index === 1 || index === 0 && gameState.roundNumber === 0}
     />
   {/each}
 

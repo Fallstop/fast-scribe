@@ -2,6 +2,7 @@
   export interface Props {
     currentText: string[];
     targetText: string[];
+    active: boolean;
   }
 </script>
 
@@ -11,7 +12,7 @@
   import { Tween } from "svelte/motion";
 
 
-  const { currentText, targetText } = $props();
+  const { currentText, targetText, active } = $props();
 
   const combinedText = $derived<string[]>(
     targetText.map((word: string, wordIndex: number) => {
@@ -95,7 +96,8 @@
 </script>
 
 <div
-  class="relative bg-secondary p-4 rounded-lg shadow-md text-2xl font-mono text-primary w-4xl">
+  class="relative bg-secondary p-4 rounded-lg shadow-md text-2xl font-mono text-primary w-4xl"
+  class:not-active={!active}>
  
   <span
     class="cursor"
@@ -130,6 +132,14 @@
     }
     &.extra-incorrect {
       color: darkred;
+    }
+  }
+
+  .not-active {
+    opacity: 0.5;
+
+    .cursor {
+      opacity: 0;
     }
   }
 
