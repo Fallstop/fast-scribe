@@ -11,7 +11,6 @@ export const makeRoomManager = () => {
       let id = randomUUID();
       let connection: MessageHandlers = {};
       connections.set(id, connection);
-      // Adhd
       rooms.set(roomCode, room);
       room.addConnection(id);
 
@@ -138,7 +137,9 @@ const makeRoom = (
         return;
       }
 
-      gameState.currentState.currentState = currentState;
+      gameState.currentState.currentState[
+        gameState.currentState.sentenceNumber
+      ] = currentState;
       broadcast({ type: "current_state", value: currentState }, connectionId);
     },
     nextRound: (connectionId: string) => {
@@ -148,7 +149,7 @@ const makeRoom = (
 
       gameState.currentState.history.push(gameState.currentState.currentState);
       gameState.currentState.currentState = [];
-      gameState.currentState.roundNumber += 1;
+      gameState.currentState.sentenceNumber += 1;
 
       broadcast({ type: "game_state", ...gameState });
     },
@@ -162,11 +163,10 @@ const makeRoom = (
       gameState = {
         inPlay: true,
         currentState: {
-          currentState: [],
           endsAt: now.getTime() + duration * 1000,
           endsIn: duration,
           history: [],
-          roundNumber: 0,
+          sentenceNumber: 0,
           started: now.getTime(),
           words: [
             "This is a test sentence.".split(" "),

@@ -8,12 +8,11 @@ type MapDiscriminatedUnion<T extends Record<K, string>, K extends keyof T> = {
 
 export type GameState = {
   words: string[][];
-  currentState: string[];
   started: number;
   endsAt: number;
   endsIn: number;
   roundNumber: number;
-  history: string[][];
+  currentState: string[][];
 };
 
 export type Role = "dictator" | "scribe";
