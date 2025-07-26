@@ -75,7 +75,7 @@
         }
       }
     }
-    
+
     client?.sendTypingUpdate(currentInput, gameState.sentenceNumber);
     
     if (key === "Enter") {
@@ -168,6 +168,7 @@
           targetText={sentence}
           currentText={gameState.currentInput[true_index] || []}
           active={true_index === gameState.sentenceNumber}
+          hideTruth={true_index >= gameState.sentenceNumber}
         />
   
       </div>

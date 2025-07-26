@@ -3,6 +3,7 @@
     currentText: string[];
     targetText: string[];
     active: boolean;
+    hideTruth?: boolean;
   }
 </script>
 
@@ -12,10 +13,10 @@
   import { Tween } from "svelte/motion";
 
 
-  const { currentText, targetText, active } = $props();
+  const { currentText, targetText, active, hideTruth } = $props();
 
   const combinedText = $derived<string[]>(
-    targetText.map((word: string, wordIndex: number) => {
+    (targetText).map((word: string, wordIndex: number) => {
       const currentWord = currentText[wordIndex] || "";
       return word.length > currentWord.length
         ? word
@@ -28,7 +29,11 @@
       currentText.length <= wordIndex ||
       currentText[wordIndex].length <= charIndex
     ) {
-      return "incomplete";
+      if (hideTruth) {
+        return "hidden";
+      } else {
+        return "incomplete";
+      }
     }
     if (
       wordIndex >= targetText.length ||
@@ -107,7 +112,13 @@
     <span class="word">
       {#each word.split("") as char, charIndex}
         <span class="char {decideClass(wordIndex, charIndex)}">
-          {char}
+          {#if hideTruth}
+            <!-- Random char -->
+            {String.fromCharCode(97 + Math.floor(Math.random() * 26))}
+          {:else}
+            {char}
+
+          {/if}
         </span>
       {/each}
     </span>

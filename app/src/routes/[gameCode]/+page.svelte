@@ -72,6 +72,8 @@
           targetText={sentence}
           currentText={gameState.currentInput[true_index] || []}
           active={true_index === gameState.sentenceNumber}
+          hideTruth={false}
+
         />
   
       </div>
