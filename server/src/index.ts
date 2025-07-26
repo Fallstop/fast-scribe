@@ -12,7 +12,10 @@ const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app });
 
 const roomManager = makeRoomManager();
 
-app.use("*", cors());
+app.use("*", cors({
+  origin: "*",
+  allowMethods: ["GET", "POST", "OPTIONS"],
+}));
 
 // Regular HTTP route
 app.get("/", (c) => c.text("Hello from Hono!"));
