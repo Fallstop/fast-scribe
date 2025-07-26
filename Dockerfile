@@ -33,5 +33,5 @@ COPY --from=build /app/server/dist ./server/dist
 
 WORKDIR /app/server
 
-EXPOSE 8000
+EXPOSE 42069
 CMD [ "node", "dist/index.mjs" ]
