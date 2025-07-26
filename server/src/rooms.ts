@@ -140,7 +140,8 @@ const makeRoom = (
       gameState.currentState.currentState[
         gameState.currentState.sentenceNumber
       ] = currentState;
-      broadcast({ type: "current_state", value: currentState }, connectionId);
+
+      broadcast({ type: "game_state", ...gameState });
     },
     nextSentence: (connectionId: string) => {
       if (!gameState.inPlay || connectionId !== scribe) {
