@@ -4,6 +4,7 @@ import { createNodeWebSocket } from "@hono/node-ws";
 import { WSContext } from "hono/ws";
 import { nanoid } from "nanoid";
 import { makeRoomManager } from "./rooms";
+import { Message } from "common";
 
 const app = new Hono();
 const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app });
@@ -25,10 +26,18 @@ app.get(
     let conn = roomManager.register(c.req.param("id"));
 
     return {
-      async onMessage(message, ws) {
-        if (typeof message.data === "string") {
+      async onMessage(message) {
+        if (typeof message.data !== "string") {
+          return;
+        }
+        const msg = JSON.parse(message.data) as Message;
+        console.log(msg);
+        switch (msg.type) {
+          case "current_state":
+            conn.broardcast(msg);
         }
       },
+
       async onOpen(_ev, ws) {
         conn.on("connect", () => {
           ws.send("User connected");
@@ -36,11 +45,12 @@ app.get(
         conn.on("disconnect", () => {
           ws.send("User disconnected");
         });
-
-        conn.broardcast({ type: "connect" });
+        conn.on("current_state", (event) => {
+          ws.send(JSON.stringify(event));
+        });
       },
+
       async onClose() {
-        conn.broardcast({ type: "disconnect" });
         conn.remove();
       },
     };
