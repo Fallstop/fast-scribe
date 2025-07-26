@@ -153,11 +153,7 @@ const makeRoom = (
       broadcast({ type: "game_state", ...gameState });
     },
     startRound: (connectionId: string, duration: number) => {
-      if (
-        gameState.inPlay ||
-        connectionId !== scribe ||
-        dictator === undefined
-      ) {
+      if (gameState.inPlay || connectionId !== scribe) {
         return;
       }
 
@@ -167,7 +163,7 @@ const makeRoom = (
         inPlay: true,
         currentState: {
           currentState: [],
-          endsAt: now.getTime() + duration*1000,
+          endsAt: now.getTime() + duration * 1000,
           endsIn: duration,
           history: [],
           roundNumber: 0,
