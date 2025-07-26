@@ -24,6 +24,6 @@ export function updateGameState(newState: MessageMap["game_state"]) {
     gameState.currentInput = actualState.currentState;
 }
 
-export function typingUpdate(currentInput: string[]) {
-    gameState.currentInput[gameState.sentenceNumber] = currentInput;
+export function typingUpdate(msg: MessageMap["current_state"]) {
+    gameState.currentInput[msg.sentenceNumber] = msg.value;
 }

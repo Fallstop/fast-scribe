@@ -44,7 +44,7 @@
     });
 
     client.on("current_state", (msg) => {
-      typingUpdate(msg.value);
+      typingUpdate(msg);
     });
   });
 </script>
