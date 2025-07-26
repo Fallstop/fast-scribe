@@ -183,6 +183,12 @@ const makeRoom = (
             "Quick brown fox jumps over the lazy dog.".split(" "),
             "Sphinx of black quartz, judge my vow.".split(" "),
             "Pack my box with five dozen liquor jugs.".split(" "),
+            "I just lost the game.".split(" "),
+            "Final boss:".split(" "),
+            "I EYE eye eYe I aye I i".split(" "),
+            "one more...".split(" "),
+            "RICK".split(" "),
+            "yippee!".split(" "),
           ],
         },
       };

@@ -1,13 +1,13 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import type { PageProps } from "./$types";
-  import { Input } from "$lib/components/ui/input";
   import TypingViewer from "$lib/components/TypingViewer.svelte";
   import { gameState, updateGameState } from "$lib/state.svelte";
-  import { json } from "@sveltejs/kit";
+  import { redirect } from '@sveltejs/kit';
   import { receive, send } from "$lib/transistion";
   import { flip } from 'svelte/animate';
   import { createClient, type WsClient } from "$lib/api.svelte";
+  import { goto } from "$app/navigation";
 
   const props: PageProps = $props();
   const gameCode = $derived(props.params.gameCode);
@@ -120,6 +120,10 @@
       client?.nextSentence(rawWpm, wpm, finalAccuracy);
     }
 
+
+    if (currentInput[currentInput.length - 1] == "rick") {
+      goto("/rick");
+    }
   }
 
   onMount(async () => {
