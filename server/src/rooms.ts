@@ -11,6 +11,7 @@ export const makeRoomManager = () => {
       let id = randomUUID();
       let connection: MessageHandlers = {};
       connections.set(id, connection);
+      // Adhd
       rooms.set(roomCode, room);
       room.addConnection(id);
 
