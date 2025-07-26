@@ -10,7 +10,7 @@ RUN pnpm install --prod --frozen-lockfile
 
 FROM base AS build
 RUN pnpm install --frozen-lockfile
-RUN pnpm --filter=common build
+RUN pnpm --filter=server build
 
 FROM node:22-slim AS runtime
 ENV PNPM_HOME="/pnpm"
