@@ -56,7 +56,7 @@ app.get(
           case "start_game":
             session.startGame(msg.duration);
             break;
-          case "set_round":
+          case "next_round":
             session.nextRound();
             break;
           default:
@@ -64,7 +64,7 @@ app.get(
         }
       },
       async onOpen(_ev, ws) {
-        const send = (value: Message) => ws.send(JSON.stringify(value));
+        const send = (value: Message) => { console.log("sending message"); ws.send(JSON.stringify(value));}
         session.all(send);
       },
       async onClose() {

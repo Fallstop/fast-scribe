@@ -31,8 +31,9 @@ export type Message =
       inPlay: true;
       currentState: GameState;
     }
-  | { type: "set_round"; value: number }
+  | { type: "next_round" }
   | { type: "words"; value: string[][] }
-  | { type: "current_state"; value: string[] };
+  | { type: "current_state"; value: string[] }
+  | { type: "hello" };
 
 export type MessageMap = MapDiscriminatedUnion<Message, "type">;

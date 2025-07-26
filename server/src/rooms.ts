@@ -16,18 +16,20 @@ export const makeRoomManager = () => {
       let room = rooms.get(roomCode) ?? makeRoom(roomCode, connections);
       let id = randomUUID();
       let connection: MessageHandlers = {};
+      connections.set(id, connection);
+      room.addConnection(id);
 
       return {
         on<T extends keyof MessageHandlers>(
           eventType: T,
-          handler: MessageHandlers[T],
+          handler: MessageHandlers[T]
         ) {
           connection[eventType] = handler;
         },
         all(handler: (ev: Message) => void) {
           connection["words"] = connection["words"] ?? handler;
           connection["connect"] = connection["connect"] ?? handler;
-          connection["set_round"] = connection["set_round"] ?? handler;
+          connection["next_round"] = connection["next_round"] ?? handler;
           connection["disconnect"] = connection["disconnect"] ?? handler;
           connection["game_start"] = connection["game_start"] ?? handler;
           connection["role_taken"] = connection["role_taken"] ?? handler;
@@ -72,7 +74,7 @@ type StateObject =
 
 const makeRoom = (
   roomId: string,
-  connectionsMap: Map<string, MessageHandlers>,
+  connectionsMap: Map<string, MessageHandlers>
 ) => {
   let connections: string[] = [];
   let dictator: string | undefined;
@@ -110,6 +112,7 @@ const makeRoom = (
       }
     },
     getConnections: () => connections,
+    addConnection: (id: string) => connections.push(id),
     getRoomId: () => roomId,
     getSize: () => connections.length,
     setDictator: (connectionId: string) => {
@@ -118,6 +121,8 @@ const makeRoom = (
       }
       dictator = connectionId;
       broadcast({ type: "connect", role: "dictator" }, connectionId);
+      broadcast({ type: "game_state", ...gameState });
+
       return true;
     },
     setScribe: (connectionId: string) => {
@@ -126,6 +131,7 @@ const makeRoom = (
       }
       scribe = connectionId;
       broadcast({ type: "connect", role: "scribe" }, connectionId);
+      broadcast({ type: "game_state", ...gameState });
       return true;
     },
     getGameState: () => gameState,
@@ -175,7 +181,7 @@ const makeRoom = (
             "Final sentence to complete the game.".split(" "),
             "I lied.".split(" "),
             "This is a longer sentence that should be typed out completely.".split(
-              " ",
+              " "
             ),
             "Medium length sentence for the game.".split(" "),
             "Quick brown fox jumps over the lazy dog.".split(" "),

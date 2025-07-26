@@ -1,12 +1,13 @@
 import { gameState } from "./state.svelte";
 import { PUBLIC_API_URL } from "$env/static/public";
+import { type Message } from "common";
 
 let gameId = $state("");
 
 let wsClient = $derived(
   gameId != ""
     ? new WebSocket(`ws://${PUBLIC_API_URL}/ws/${gameId}`)
-    : undefined,
+    : undefined
 );
 
 // $effect(() => {
@@ -17,11 +18,18 @@ let wsClient = $derived(
 //     wsClient.addEventListener("message", onMessage);
 // })
 
+function send(msg: Message) {
+  wsClient?.send(JSON.stringify(msg));
+  console.log("sent: " + JSON.stringify(msg))
+}
+
 export function getGameId() {
   return gameId;
 }
 
-function onMessage(ev: MessageEvent<any>) {}
+function onMessage(ev: MessageEvent<any>) {
+  console.log("recieved: "+ ev.data);
+}
 
 function generateClientId() {
   return Math.random().toString(36).substring(2, 15);
@@ -38,11 +46,12 @@ export async function createGame(): Promise<string> {
 }
 
 export function nextRound() {
-  // should be controlled by the server?
-  gameState.roundNumber += 1;
+  send({
+    type: "next_round",
+  });
 }
 
-export async function joinGame(_gameId: string) {
+export async function joinGame(_gameId: string, scribe: boolean) {
   gameId = _gameId;
 
   // Check if the game ID is valid
@@ -55,12 +64,37 @@ export async function joinGame(_gameId: string) {
     localStorage.getItem(`clientId-${gameId}`) || generateClientId();
   localStorage.setItem(`clientId-${gameId}`, clientId);
 
-  // console.log(`Client ${clientId} joined game ${gameId}`);
+  if (wsClient) {
+    wsClient.addEventListener("message", onMessage);
+    wsClient.addEventListener("open", () => {
+      send({
+        type: "connect",
+        role: scribe ? "scribe" : "dictator",
+      });
+      if (scribe) {
+          send({
+            type: "start_game",
+            duration: 60
+          })
+      }
+    });
+
+  } else {
+    console.log("SOMETHING WENT TERRIBLY WRONG");
+  }
 }
 
-export async function sendTypingUpdate(newText: string[]) {}
+export async function sendTypingUpdate(newText: string[]) {
+  send({
+    type: "current_state",
+    // value: gameState.currentInput[gameState.currentInput.length-1]
+    value: newText,
+  });
+}
 
-export async function getGameState() {}
+export async function setGameState() {
+  // gameState =
+}
 
 export async function typingUpdate(newText: string[]) {
   gameState.currentInput[gameState.roundNumber] = newText;

@@ -6,21 +6,14 @@
   import { onMount } from "svelte";
   import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
   
-  import QrCode from "svelte-qrcode"
+  import QrCode from "svelte-qrcode";
 
   let gameId = "";
 
-  function create() {
-    gameId = createGame();
+  async function create() {
+    gameId = await createGame();
     // goto(`/${gameId}/writer`);
   }
-
-  onMount(() => {
-    const socket = io("localhost:42069");
-    socket.on("message", (message) => {
-      console.log(message);
-    });
-  });
 </script>
 
 <div class="flex flex-col items-center justify-center h-screen">

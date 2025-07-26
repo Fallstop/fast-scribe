@@ -117,7 +117,7 @@
 
   onMount(async () => {
     // Initialize game state for the specific game code
-    await joinGame(gameCode);
+    await joinGame(gameCode, true);
   });
 </script>
 
