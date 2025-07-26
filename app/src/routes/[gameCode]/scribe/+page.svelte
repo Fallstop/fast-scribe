@@ -4,13 +4,18 @@
   import { Input } from "$lib/components/ui/input";
   import TypingViewer from "$lib/components/TypingViewer.svelte";
   import { gameState } from "$lib/state.svelte";
-  import { joinGame, nextRound, sendTypingUpdate, typingUpdate } from "$lib/api.svelte";
   import { json } from "@sveltejs/kit";
   import { receive, send } from "$lib/transistion";
   import { flip } from 'svelte/animate';
+  import { createClient, type WsClient } from "$lib/api.svelte";
 
   const props: PageProps = $props();
   const gameCode = $derived(props.params.gameCode);
+
+  let hasScribe = $state(false);
+  let hasDictator = $state(false);
+  const ready = $derived(hasScribe && hasDictator);
+  let isPlaying = $state(false);
 
   // Keep track of the words. Space moves to the next word.
 
@@ -23,6 +28,8 @@
       gameState.currentInput.push([]);
     }
   })
+
+  let client: WsClient | undefined = $state(); 
 
   let startTime: DOMHighResTimeStamp;
   function startTimer() {
@@ -109,19 +116,36 @@
       // console.log("RAW:", rawWpm, "WPM:", wpm, "ACC:", accuracy, "EXCESS:", excessLetters, "ALLCORRECT:", allCorrectlyTypedLetters, "ALLTOTYPE:", allLettersToType);
       console.log("RAW:", rawWpm.toFixed(2), "WPM:", wpm.toFixed(2), "FINAL ACC:", (finalAccuracy * 100).toFixed(2) + "%");
 
-      nextRound();
+      client?.nextRound();
     }
 
-    sendTypingUpdate(currentInput);
+    client?.sendTypingUpdate(currentInput);
   }
 
   onMount(async () => {
     // Initialize game state for the specific game code
-    await joinGame(gameCode, true);
+    createClient(gameCode).then((conn) => client = conn);
+  });
+  
+  $effect(() => {
+    if (!client) {
+        return;
+    }
+
+    client.connect("scribe");
+    client.on("connect", (msg) => {
+      if (msg.role === "scribe") hasScribe = true;
+      if (msg.role === "dictator") hasDictator = true;
+    });
+    client.on("game_start", (msg) => {
+        isPlaying = true;
+    }) 
   });
 </script>
 
 <svelte:body onkeydown={handleInput} />
+
+{#if isPlaying}
 
 <div class="flex flex-col items-center justify-center h-screen">
   <h1 class="text-3xl font-bold mb-4">Fast Scribe - Game Code: {gameCode}</h1>
@@ -147,10 +171,8 @@
     {/each}
 
   </div>
-
-
-  <!-- <TypingViewer
-    targetText={gameState.gameSentences[gameState.roundNumber] || []}
-    currentText={gameState.currentInput[gameState.roundNumber] || []}
-  /> -->
 </div>
+
+{:else}
+    <button disabled={ready} class="fill-emerald-400 disabled:fill-emerald-950" onclick={() => {console.log("starting"); client?.start(30)}}>Start game</button>
+{/if}

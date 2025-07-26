@@ -9,9 +9,7 @@
 
   const props: PageProps = $props();
   const gameCode = $derived(props.params.gameCode);
-  let hasScribe = $state(false);
-  let hasDictator = $state(false);
-  const ready = $derived(hasScribe && hasDictator);
+
   let isPlaying = $state(false);
 
   let currentInput: string[] = $derived<string[]>(
@@ -24,25 +22,21 @@
     }
   })
 
-    let client: WsClient | undefined = $state(); 
+  let client: WsClient | undefined = $state(); 
 
   onMount(() => {
       createClient(gameCode).then((conn) => client = conn);
   })
 
   $effect(() => {
-     if (!client) {
-          return;
-      }
+    if (!client) {
+        return;
+    }
 
-      client.connect("dictator");
-      client.on("connect", (msg) => {
-        if (msg.role === "scribe") hasScribe = true;
-        if (msg.role === "dictator") hasDictator = true;
-      });
-      client.on("game_start", (msg) => {
-          isPlaying = true;
-      }) 
+    client.connect("dictator");
+    client.on("game_start", (msg) => {
+        isPlaying = true;
+    }) 
   });
 </script>
 
@@ -83,8 +77,9 @@
     currentText={gameState.currentInput[gameState.roundNumber] || []}
   /> -->
 </div>
+
 {:else}
-    <button disabled={ready} class="fill-emerald-400 disabled:fill-emerald-950" onclick={() => client.start(30)}>Start game</button>
+Waiting for start
 {/if}
 {:else}
 Loading fool
