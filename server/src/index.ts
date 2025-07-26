@@ -3,16 +3,16 @@ import { serve } from "@hono/node-server";
 import { createNodeWebSocket } from "@hono/node-ws";
 import { WSContext } from "hono/ws";
 import { nanoid } from "nanoid";
-import { makeRoomManager } from "./rooms";
+import { makeRoomManager } from "./rooms.js";
 import { Message } from "common";
-import { cors } from 'hono/cors'
+import { cors } from "hono/cors";
 
 const app = new Hono();
 const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app });
 
 const roomManager = makeRoomManager();
 
-app.use('*', cors())
+app.use("*", cors());
 
 // Regular HTTP route
 app.get("/", (c) => c.text("Hello from Hono!"));
@@ -26,10 +26,10 @@ app.post("/create-room", (c) =>
 app.get(
   "/ws/:id",
   upgradeWebSocket((c) => {
-    let conn = roomManager.register(c.req.param("id"));
+    let session = roomManager.register(c.req.param("id"));
 
     return {
-      async onMessage(message) {
+      async onMessage(message, ws) {
         if (typeof message.data !== "string") {
           return;
         }
@@ -37,24 +37,35 @@ app.get(
         console.log(msg);
         switch (msg.type) {
           case "current_state":
-            conn.broardcast(msg);
+            session.updateState(msg.value);
+            break;
+          case "connect":
+            if (msg.role === "scribe") {
+              if (!session.joinScribe()) {
+                ws.send(JSON.stringify({ type: "role_taken" } as Message));
+              }
+            } else {
+              if (!session.joinDictator()) {
+                ws.send(JSON.stringify({ type: "role_taken" } as Message));
+              }
+            }
+            break;
+          case "start_game":
+            session.startGame(msg.duration);
+            break;
+          case "set_round":
+            session.nextRound();
+            break;
+          default:
+            console.log("Unexpected message", msg);
         }
       },
-
       async onOpen(_ev, ws) {
-        conn.on("connect", () => {
-          ws.send("User connected");
-        });
-        conn.on("disconnect", () => {
-          ws.send("User disconnected");
-        });
-        conn.on("current_state", (event) => {
-          ws.send(JSON.stringify(event));
-        });
+        const send = (value: Message) => ws.send(JSON.stringify(value));
+        session.all(send);
       },
-
       async onClose() {
-        conn.remove();
+        session.remove();
       },
     };
   }),

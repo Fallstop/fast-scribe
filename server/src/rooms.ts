@@ -5,6 +5,8 @@ type MessageHandlers = {
   [t in keyof MessageMap]?: (msg: MessageMap[t]) => void;
 };
 
+const assertNever = (value: never) => {};
+
 // export const makeRoomManager = () => {
 //   const rooms = new Map<string, string[]>();
 //   const connections: Map<string, MessageHandlers> = new Map();
@@ -103,9 +105,22 @@ export const makeRoomManager = () => {
         ) {
           connection[eventType] = handler;
         },
+        all(handler: (ev: Message) => void) {
+          connection["words"] = connection["words"] ?? handler;
+          connection["connect"] = connection["connect"] ?? handler;
+          connection["set_round"] = connection["set_round"] ?? handler;
+          connection["disconnect"] = connection["disconnect"] ?? handler;
+          connection["game_start"] = connection["game_start"] ?? handler;
+          connection["role_taken"] = connection["role_taken"] ?? handler;
+          connection["start_game"] = connection["start_game"] ?? handler;
+          connection["game_state"] = connection["game_state"] ?? handler;
+          connection["current_state"] = connection["current_state"] ?? handler;
+          connection["game_start"] = connection["game_start"] ?? handler;
+        },
         remove() {
           room.removeConnection(id);
           if (room.getSize() < 1) {
+            room.clearInterval();
             rooms.delete(roomCode);
           }
         },
@@ -146,6 +161,7 @@ const makeRoom = (
   let gameState = {
     inPlay: false,
   } as StateObject;
+  let interval: ReturnType<typeof setInterval> | undefined;
 
   let broadcast = (message: Message, sourceId?: string) => {
     for (const connection of connections) {
@@ -249,9 +265,10 @@ const makeRoom = (
           ],
         },
       };
-      let interval = setInterval(() => {
+      interval = setInterval(() => {
         if (!gameState.inPlay) {
           clearInterval(interval);
+          interval = undefined;
           return;
         }
 
@@ -265,12 +282,19 @@ const makeRoom = (
           };
 
           clearInterval(interval);
+          interval = undefined;
           broadcast({ type: "game_state", ...gameState });
           return;
         }
 
         broadcast({ type: "game_end_in", in: gameState.currentState.endsIn });
       }, 1000);
+    },
+    clearInterval() {
+      if (interval) {
+        clearInterval(interval);
+        interval = undefined;
+      }
     },
     broadcast,
   };
