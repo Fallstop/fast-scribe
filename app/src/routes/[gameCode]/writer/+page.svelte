@@ -104,10 +104,10 @@
 
       let rawWpm = allTypedLetters/5 * (60000/time);
       let wpm = lettersInCorrectlyTypedWords/5 * (60000/time);
-      let accuracy = allCorrectlyTypedLetters / (allLettersToType + excessLetters);
+      let finalAccuracy = allCorrectlyTypedLetters / (allLettersToType + excessLetters);
 
       // console.log("RAW:", rawWpm, "WPM:", wpm, "ACC:", accuracy, "EXCESS:", excessLetters, "ALLCORRECT:", allCorrectlyTypedLetters, "ALLTOTYPE:", allLettersToType);
-      console.log("RAW:", rawWpm.toFixed(2), "WPM:", wpm.toFixed(2), "ACC:", (accuracy * 100).toFixed(2) + "%");
+      console.log("RAW:", rawWpm.toFixed(2), "WPM:", wpm.toFixed(2), "FINAL ACC:", (finalAccuracy * 100).toFixed(2) + "%");
 
       nextRound();
     }

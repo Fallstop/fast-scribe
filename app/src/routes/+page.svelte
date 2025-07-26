@@ -3,7 +3,6 @@
   import { goto } from "$app/navigation";
   import { createGame } from "$lib/api.svelte";
   import Button from "$lib/components/ui/button/button.svelte";
-  import { io } from "socket.io-client";
   import { onMount } from "svelte";
   import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
   
