@@ -117,7 +117,7 @@
       // console.log("RAW:", rawWpm, "WPM:", wpm, "ACC:", accuracy, "EXCESS:", excessLetters, "ALLCORRECT:", allCorrectlyTypedLetters, "ALLTOTYPE:", allLettersToType);
       console.log("RAW:", rawWpm.toFixed(2), "WPM:", wpm.toFixed(2), "FINAL ACC:", (finalAccuracy * 100).toFixed(2) + "%");
 
-      client?.nextSentence();
+      client?.nextSentence(rawWpm, wpm, finalAccuracy);
     }
 
   }
