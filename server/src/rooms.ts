@@ -184,6 +184,8 @@ const makeRoom = (
           ],
         },
       };
+
+      broadcast({ type: "game_state", ...gameState });
       interval = setInterval(() => {
         if (!gameState.inPlay) {
           clearInterval(interval);

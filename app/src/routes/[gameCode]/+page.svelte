@@ -45,7 +45,6 @@
 
 {#if client}
 {#if isPlaying}
-
 <div class="flex flex-col items-center justify-center h-screen">
   <h1 class="text-3xl font-bold mb-4">Fast Scribe (Dictator view!)</h1>
   <p class="mb-8">debug data: {JSON.stringify(gameState.currentInput)} </p>

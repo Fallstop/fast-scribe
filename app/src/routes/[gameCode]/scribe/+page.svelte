@@ -12,9 +12,6 @@
   const props: PageProps = $props();
   const gameCode = $derived(props.params.gameCode);
 
-  let hasScribe = $state(false);
-  let hasDictator = $state(false);
-  const ready = $derived(hasScribe && hasDictator);
   let isPlaying = $state(false);
 
   // Keep track of the words. Space moves to the next word.
@@ -134,18 +131,16 @@
 
     client.connect("scribe");
     client.on("connect", (msg) => {
-      if (msg.role === "scribe") hasScribe = true;
-      if (msg.role === "dictator") hasDictator = true;
+      if (msg.role == "scribe") client?.start(30); 
     });
-    client.on("game_start", (msg) => {
+
+    client.on("game_state", (msg) => {
         isPlaying = true;
-    }) 
+    });
   });
 </script>
 
 <svelte:body onkeydown={handleInput} />
-
-{#if isPlaying}
 
 <div class="flex flex-col items-center justify-center h-screen">
   <h1 class="text-3xl font-bold mb-4">Fast Scribe - Game Code: {gameCode}</h1>
@@ -173,6 +168,3 @@
   </div>
 </div>
 
-{:else}
-    <button disabled={ready} class="fill-emerald-400 disabled:fill-emerald-950" onclick={() => {console.log("starting"); client?.start(30)}}>Start game</button>
-{/if}
