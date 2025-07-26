@@ -25,7 +25,7 @@ export type Message =
   | { type: "start_game"; duration: number }
   | { type: "game_start"; startTime: number }
   | { type: "game_end_in"; in: number }
-  | { type: "game_state"; inPlay: false }
+  | { type: "game_state"; inPlay: false; lastRound?: GameState }
   | {
       type: "game_state";
       inPlay: true;

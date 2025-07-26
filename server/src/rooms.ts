@@ -1,93 +1,139 @@
 import { GameState, Message, MessageMap } from "common";
 import { randomUUID } from "crypto";
-import { UnsupportedPathError } from "hono/router";
 
 type MessageHandlers = {
   [t in keyof MessageMap]?: (msg: MessageMap[t]) => void;
 };
 
+// export const makeRoomManager = () => {
+//   const rooms = new Map<string, string[]>();
+//   const connections: Map<string, MessageHandlers> = new Map();
+//
+//   const send = (
+//     roomCode:
+//     event: Message,
+//     ignoreConnection?: string,
+//   ) => {
+//     const connectionIds = rooms.get(roomCode);
+//     if (!connectionIds) {
+//       return;
+//     }
+//
+//     for (const connectionId of connectionIds) {
+//       if (connectionId === ignoreConnection) {
+//         continue;
+//       }
+//
+//       const connection = connections.get(connectionId);
+//       if (!connection) {
+//         return;
+//       }
+//
+//       const method = connection[event.type];
+//       if (method) {
+//         // @ts-ignore
+//         method(event);
+//       }
+//     }
+//   };
+//
+//   return {
+//     register(roomCode: string) {
+//       const id = randomUUID();
+//       const handlers: MessageHandlers = {};
+//       const room = rooms.get(roomCode) ?? [];
+//
+//       rooms.set(roomCode, room);
+//       room.push(id);
+//       connections.set(id, handlers);
+//
+//       const on = <T extends keyof MessageMap>(
+//         message: T,
+//         handler: MessageHandlers[T],
+//       ) => {
+//         handlers[message] = handler;
+//       };
+//
+//       const remove = () => {
+//         connections.delete(id);
+//         const room = rooms.get(roomCode);
+//         if (!room) {
+//           return;
+//         }
+//
+//         rooms.set(
+//           roomCode,
+//           room.filter((x) => x != id),
+//         );
+//
+//         if (rooms.get(roomCode)?.length ?? 1 < 1) {
+//           rooms.delete(roomCode);
+//         }
+//       };
+//
+//       const broardcast = (event: Message) => {
+//         send(roomCode, event, id);
+//       };
+//
+//       return {
+//         on,
+//         remove,
+//         broardcast,
+//       };
+//     },
+//     send,
+//   };
+// };
+//
+
 export const makeRoomManager = () => {
-  const rooms = new Map<string, string[]>();
-  const connections: Map<string, MessageHandlers> = new Map();
-
-  const send = (
-    roomCode: string,
-    event: Message,
-    ignoreConnection?: string,
-  ) => {
-    const connectionIds = rooms.get(roomCode);
-    if (!connectionIds) {
-      return;
-    }
-
-    for (const connectionId of connectionIds) {
-      if (connectionId === ignoreConnection) {
-        continue;
-      }
-
-      const connection = connections.get(connectionId);
-      if (!connection) {
-        return;
-      }
-
-      const method = connection[event.type];
-      if (method) {
-        // @ts-ignore
-        method(event);
-      }
-    }
-  };
+  const rooms = new Map<string, ReturnType<typeof makeRoom>>();
+  const connections = new Map<string, MessageHandlers>();
 
   return {
-    register(roomCode: string) {
-      const id = randomUUID();
-      const handlers: MessageHandlers = {};
-      const room = rooms.get(roomCode) ?? [];
-
-      rooms.set(roomCode, room);
-      room.push(id);
-      connections.set(id, handlers);
-
-      const on = <T extends keyof MessageMap>(
-        message: T,
-        handler: MessageHandlers[T],
-      ) => {
-        handlers[message] = handler;
-      };
-
-      const remove = () => {
-        connections.delete(id);
-        const room = rooms.get(roomCode);
-        if (!room) {
-          return;
-        }
-
-        rooms.set(
-          roomCode,
-          room.filter((x) => x != id),
-        );
-
-        if (rooms.get(roomCode)?.length ?? 1 < 1) {
-          rooms.delete(roomCode);
-        }
-      };
-
-      const broardcast = (event: Message) => {
-        send(roomCode, event, id);
-      };
+    register: (roomCode: string) => {
+      let room = rooms.get(roomCode) ?? makeRoom(roomCode, connections);
+      let id = randomUUID();
+      let connection: MessageHandlers = {};
 
       return {
-        on,
-        remove,
-        broardcast,
+        on<T extends keyof MessageHandlers>(
+          eventType: T,
+          handler: MessageHandlers[T],
+        ) {
+          connection[eventType] = handler;
+        },
+        remove() {
+          room.removeConnection(id);
+          if (room.getSize() < 1) {
+            rooms.delete(roomCode);
+          }
+        },
+        broadcast(message: Message) {
+          room.broadcast(message, id);
+        },
+        updateState(currentState: string[]) {
+          room.updateCurrentSentence(id, currentState);
+        },
+        startGame(duration: number) {
+          room.startRound(id, duration);
+        },
+        nextRound() {
+          room.nextRound(id);
+        },
+        joinScribe() {
+          return room.setScribe(id);
+        },
+        joinDictator() {
+          return room.setDictator(id);
+        },
       };
     },
-    send,
   };
 };
 
 type StateObject =
-  | { inPlay: false }
+  | { inPlay: false; lastRound?: GameState }
   | { inPlay: true; currentState: GameState };
 
 const makeRoom = (
@@ -120,9 +166,11 @@ const makeRoom = (
 
       if (scribe === connectionId) {
         scribe = undefined;
+        broadcast({ type: "disconnect", role: "scribe" });
       }
 
       if (dictator === connectionId) {
+        broadcast({ type: "disconnect", role: "dictator" });
         dictator = undefined;
       }
     },
@@ -134,6 +182,7 @@ const makeRoom = (
         return false;
       }
       dictator = connectionId;
+      broadcast({ type: "connect", role: "dictator" }, connectionId);
       return true;
     },
     setScribe: (connectionId: string) => {
@@ -141,6 +190,7 @@ const makeRoom = (
         return false;
       }
       scribe = connectionId;
+      broadcast({ type: "connect", role: "scribe" }, connectionId);
       return true;
     },
     getGameState: () => gameState,
@@ -199,6 +249,29 @@ const makeRoom = (
           ],
         },
       };
+      let interval = setInterval(() => {
+        if (!gameState.inPlay) {
+          clearInterval(interval);
+          return;
+        }
+
+        gameState.currentState.endsIn =
+          gameState.currentState.endsAt - new Date().getTime();
+
+        if (gameState.currentState.endsIn < 0) {
+          gameState = {
+            inPlay: false,
+            lastRound: gameState.currentState,
+          };
+
+          clearInterval(interval);
+          broadcast({ type: "game_state", ...gameState });
+          return;
+        }
+
+        broadcast({ type: "game_end_in", in: gameState.currentState.endsIn });
+      }, 1000);
     },
+    broadcast,
   };
 };
