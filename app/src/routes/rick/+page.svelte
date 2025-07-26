@@ -5,7 +5,7 @@
     onMount(() => {
         const timer = setTimeout(() => {
             window.history.back();
-        }, 1000);
+        }, 250);
     });
 </script>
 
