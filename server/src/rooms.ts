@@ -167,7 +167,7 @@ const makeRoom = (
         inPlay: true,
         currentState: {
           currentState: [],
-          endsAt: now.getTime() + duration,
+          endsAt: now.getTime() + duration*1000,
           endsIn: duration,
           history: [],
           roundNumber: 0,
