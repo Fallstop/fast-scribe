@@ -6,8 +6,28 @@ type MapDiscriminatedUnion<T extends Record<K, string>, K extends keyof T> = {
   [V in T[K]]: DiscriminateUnion<T, K, V>;
 };
 
+export type Role = "dictator" | "scribe";
+
 export type Message =
-  | { type: "connect" }
-  | { type: "disconnect" }
-  | { type: "keydown"; value: string };
+  | { type: "connect"; role: Role }
+  | { type: "role_taken" }
+  | { type: "disconnect"; role: Role }
+  | { type: "start_game"; duration: number }
+  | { type: "game_start"; startTime: number }
+  | { type: "game_end_in"; in: number }
+  | { type: "game_state"; inPlay: false }
+  | {
+      type: "game_state";
+      inPlay: true;
+      currentState: {
+        words: string[][];
+        currentState: string[];
+        started: number;
+        endsAt: number;
+        endsIn: number;
+      };
+    }
+  | { type: "words"; value: string[][] }
+  | { type: "current_state"; value: string[] };
+
 export type MessageMap = MapDiscriminatedUnion<Message, "type">;
