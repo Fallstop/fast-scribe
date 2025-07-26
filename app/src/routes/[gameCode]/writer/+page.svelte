@@ -7,7 +7,7 @@
   import { joinGame, nextRound, sendTypingUpdate, typingUpdate } from "$lib/api.svelte";
   import { json } from "@sveltejs/kit";
   import { receive, send } from "$lib/transistion";
-import { flip } from 'svelte/animate';
+  import { flip } from 'svelte/animate';
 
   const props: PageProps = $props();
   const gameCode = $derived(props.params.gameCode);
@@ -24,9 +24,21 @@ import { flip } from 'svelte/animate';
     }
   })
 
+  let startTime: DOMHighResTimeStamp;
+  function startTimer() {
+    startTime = performance.now();
+  }
+  function endTimer(): DOMHighResTimeStamp {
+    return performance.now() - startTime;
+  }
+
   function handleInput(event: KeyboardEvent) {
     const key = event.key;
-    console.log("Key pressed:", key);
+    // console.log("Key pressed:", key);
+
+    if (currentInput.length == 0 || (currentInput.length == 1 && currentInput[currentInput.length - 1].length == 0)) {
+      startTimer();
+    }
 
     if (key === " ") {
       // Move to the next word, if the current word is not empty
@@ -59,6 +71,44 @@ import { flip } from 'svelte/animate';
         }
       }
     } else if (key === "Enter") {
+      let time = endTimer();
+
+      let lettersInCorrectlyTypedWords = 0; // MonkeyType-style WPM
+      let allCorrectlyTypedLetters = 0; // MonkeyType-style accuracy
+      let allLettersToType = gameState.gameSentences[gameState.roundNumber].join("").length; // Also for accuracy
+      let excessLetters = 0; // More for accuracy
+      let allTypedLetters = 0; // MonkeyType-style raw WPM
+
+      currentInput.forEach((word, index) => {
+        allTypedLetters+=word.length;
+        if (index >= gameState.gameSentences[gameState.roundNumber].length) {
+          excessLetters+=word.length;
+          return;
+        }
+        if (word == gameState.gameSentences[gameState.roundNumber][index]) {
+          lettersInCorrectlyTypedWords+=word.length;
+          allCorrectlyTypedLetters+=word.length;
+        } else {
+          let correctText = [...gameState.gameSentences[gameState.roundNumber][index]];
+          [...word].forEach((letter, index) => {
+            if (index >= correctText.length) {
+              excessLetters++;
+              return;
+            }
+            if (letter == correctText[index]) {
+              allCorrectlyTypedLetters++;
+            }
+          });
+        }
+      });
+
+      let rawWpm = allTypedLetters/5 * (60000/time);
+      let wpm = lettersInCorrectlyTypedWords/5 * (60000/time);
+      let accuracy = allCorrectlyTypedLetters / (allLettersToType + excessLetters);
+
+      // console.log("RAW:", rawWpm, "WPM:", wpm, "ACC:", accuracy, "EXCESS:", excessLetters, "ALLCORRECT:", allCorrectlyTypedLetters, "ALLTOTYPE:", allLettersToType);
+      console.log("RAW:", rawWpm.toFixed(2), "WPM:", wpm.toFixed(2), "ACC:", (accuracy * 100).toFixed(2) + "%");
+
       nextRound();
     }
 
