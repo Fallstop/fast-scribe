@@ -32,7 +32,7 @@ export type Message =
     }
   | { type: "next_sentence" }
   | { type: "words"; value: string[][] }
-  | { type: "current_state"; value: string[] }
+  | { type: "current_state"; value: string[], sentenceNumber: number }
   | { type: "hello" };
 
 export type MessageMap = MapDiscriminatedUnion<Message, "type">;

@@ -74,7 +74,11 @@
           currentInput.pop();
         }
       }
-    } else if (key === "Enter") {
+    }
+    
+    client?.sendTypingUpdate(currentInput, gameState.sentenceNumber);
+    
+    if (key === "Enter") {
       let time = endTimer();
 
       let lettersInCorrectlyTypedWords = 0; // MonkeyType-style WPM
@@ -116,7 +120,6 @@
       client?.nextSentence();
     }
 
-    client?.sendTypingUpdate(currentInput);
   }
 
   onMount(async () => {
