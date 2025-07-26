@@ -12,10 +12,13 @@ const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app });
 
 const roomManager = makeRoomManager();
 
-app.use("*", cors({
-  origin: "*",
-  allowMethods: ["GET", "POST", "OPTIONS"],
-}));
+app.use(
+  "*",
+  cors({
+    origin: "*",
+    allowMethods: ["GET", "POST", "OPTIONS"],
+  }),
+);
 
 // Regular HTTP route
 app.get("/", (c) => c.text("Hello from Hono!"));
@@ -36,6 +39,7 @@ app.get(
         if (typeof message.data !== "string") {
           return;
         }
+
         const msg = JSON.parse(message.data) as Message;
         console.log(msg);
         switch (msg.type) {
@@ -64,7 +68,10 @@ app.get(
         }
       },
       async onOpen(_ev, ws) {
-        const send = (value: Message) => { console.log("sending message"); ws.send(JSON.stringify(value));}
+        const send = (value: Message) => {
+          console.log("sending message");
+          ws.send(JSON.stringify(value));
+        };
         session.all(send);
       },
       async onClose() {

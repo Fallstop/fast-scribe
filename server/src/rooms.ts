@@ -47,7 +47,7 @@ export const makeRoomManager = () => {
           room.updateCurrentSentence(id, currentState);
         },
         startGame(duration: number) {
-          room.startRound(id, duration);
+          room.startGame(id, duration);
         },
         nextRound() {
           room.nextRound(id);
@@ -147,13 +147,12 @@ const makeRoom = (
         return;
       }
 
-      gameState.currentState.history.push(gameState.currentState.currentState);
-      gameState.currentState.currentState = [];
+      gameState.currentState.currentState.push([]);
       gameState.currentState.sentenceNumber += 1;
 
       broadcast({ type: "game_state", ...gameState });
     },
-    startRound: (connectionId: string, duration: number) => {
+    startGame: (connectionId: string, duration: number) => {
       if (gameState.inPlay || connectionId !== scribe) {
         return;
       }
@@ -165,7 +164,7 @@ const makeRoom = (
         currentState: {
           endsAt: now.getTime() + duration * 1000,
           endsIn: duration,
-          history: [],
+          currentState: [[]],
           sentenceNumber: 0,
           started: now.getTime(),
           words: [

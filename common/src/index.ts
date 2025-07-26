@@ -11,7 +11,7 @@ export type GameState = {
   started: number;
   endsAt: number;
   endsIn: number;
-  roundNumber: number;
+  sentenceNumber: number;
   currentState: string[][];
 };
 
