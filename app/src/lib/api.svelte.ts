@@ -49,8 +49,8 @@ export const createClient = async (gameCode: string) => {
     sendTypingUpdate(currentInput: string[]) {
       send({ type: "current_state", value: currentInput });
     },
-    nextRound() {
-      send({ type: "next_round" });
+    nextSentence() {
+      send({ type: "next_sentence" });
     },
     start(duration: number) {
       send({ type: "start_game", duration });

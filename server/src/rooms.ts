@@ -24,7 +24,7 @@ export const makeRoomManager = () => {
         all(handler: (ev: Message) => void) {
           connection["words"] = connection["words"] ?? handler;
           connection["connect"] = connection["connect"] ?? handler;
-          connection["next_round"] = connection["next_round"] ?? handler;
+          connection["next_sentence"] = connection["next_sentence"] ?? handler;
           connection["disconnect"] = connection["disconnect"] ?? handler;
           connection["game_start"] = connection["game_start"] ?? handler;
           connection["role_taken"] = connection["role_taken"] ?? handler;
@@ -49,8 +49,8 @@ export const makeRoomManager = () => {
         startGame(duration: number) {
           room.startGame(id, duration);
         },
-        nextRound() {
-          room.nextRound(id);
+        nextSentence() {
+          room.nextSentence(id);
         },
         joinScribe() {
           return room.setScribe(id);
@@ -142,7 +142,7 @@ const makeRoom = (
       ] = currentState;
       broadcast({ type: "current_state", value: currentState }, connectionId);
     },
-    nextRound: (connectionId: string) => {
+    nextSentence: (connectionId: string) => {
       if (!gameState.inPlay || connectionId !== scribe) {
         return;
       }

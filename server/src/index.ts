@@ -60,8 +60,8 @@ app.get(
           case "start_game":
             session.startGame(msg.duration);
             break;
-          case "next_round":
-            session.nextRound();
+          case "next_sentence":
+            session.nextSentence();
             break;
           default:
             console.log("Unexpected message", msg);

@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { PageProps } from "./$types";
   import TypingViewer from "$lib/components/TypingViewer.svelte";
-  import { gameState } from "$lib/state.svelte";
+  import { gameState, typingUpdate, updateGameState } from "$lib/state.svelte";
   import { receive, send } from "$lib/transistion";
   import { flip } from 'svelte/animate';
   import { createClient, type WsClient } from '$lib/api.svelte';
@@ -13,7 +13,7 @@
   let isPlaying = $state(false);
 
   let currentInput: string[] = $derived<string[]>(
-    gameState.currentInput[gameState.roundNumber]
+    gameState.currentInput[gameState.sentenceNumber]
   );
 
   $effect(() =>{
@@ -37,6 +37,15 @@
     client.on("game_start", (msg) => {
         isPlaying = true;
     }) 
+    client.on("game_state", msg => {
+      updateGameState(msg);
+
+      isPlaying = msg.inPlay;
+    });
+
+    client.on("current_state", (msg) => {
+      typingUpdate(msg.value);
+    });
   });
 </script>
 
@@ -51,7 +60,7 @@
   {JSON.stringify(currentInput)}
 
   <div class="flex flex-col items-left justify-center gap-2 w-full max-w-[80ch] overflow-x-hidden h-[12ex] rounded bg-accent">
-    {#each gameState.gameSentences.entries().toArray().slice(Math.max(gameState.roundNumber-1,0), gameState.roundNumber+2) as all (all[0])}
+    {#each gameState.gameSentences.entries().toArray().slice(Math.max(gameState.sentenceNumber-1,0), gameState.sentenceNumber+2) as all (all[0])}
       {@const true_index = all[0]}
       {@const sentence = all[1]}
       <div
@@ -62,7 +71,7 @@
         <TypingViewer
           targetText={sentence}
           currentText={gameState.currentInput[true_index] || []}
-          active={true_index === gameState.roundNumber}
+          active={true_index === gameState.sentenceNumber}
         />
   
       </div>
@@ -81,5 +90,5 @@
 Waiting for start
 {/if}
 {:else}
-Loading fool
+Connecting to game...
 {/if}

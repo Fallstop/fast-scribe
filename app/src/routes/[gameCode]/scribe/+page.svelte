@@ -3,7 +3,7 @@
   import type { PageProps } from "./$types";
   import { Input } from "$lib/components/ui/input";
   import TypingViewer from "$lib/components/TypingViewer.svelte";
-  import { gameState } from "$lib/state.svelte";
+  import { gameState, updateGameState } from "$lib/state.svelte";
   import { json } from "@sveltejs/kit";
   import { receive, send } from "$lib/transistion";
   import { flip } from 'svelte/animate';
@@ -17,7 +17,7 @@
   // Keep track of the words. Space moves to the next word.
 
   let currentInput: string[] = $derived<string[]>(
-    gameState.currentInput[gameState.roundNumber]
+    gameState.currentInput[gameState.sentenceNumber]
   );
 
   $effect(() =>{
@@ -79,21 +79,21 @@
 
       let lettersInCorrectlyTypedWords = 0; // MonkeyType-style WPM
       let allCorrectlyTypedLetters = 0; // MonkeyType-style accuracy
-      let allLettersToType = gameState.gameSentences[gameState.roundNumber].join("").length; // Also for accuracy
+      let allLettersToType = gameState.gameSentences[gameState.sentenceNumber].join("").length; // Also for accuracy
       let excessLetters = 0; // More for accuracy
       let allTypedLetters = 0; // MonkeyType-style raw WPM
 
       currentInput.forEach((word, index) => {
         allTypedLetters+=word.length;
-        if (index >= gameState.gameSentences[gameState.roundNumber].length) {
+        if (index >= gameState.gameSentences[gameState.sentenceNumber].length) {
           excessLetters+=word.length;
           return;
         }
-        if (word == gameState.gameSentences[gameState.roundNumber][index]) {
+        if (word == gameState.gameSentences[gameState.sentenceNumber][index]) {
           lettersInCorrectlyTypedWords+=word.length;
           allCorrectlyTypedLetters+=word.length;
         } else {
-          let correctText = [...gameState.gameSentences[gameState.roundNumber][index]];
+          let correctText = [...gameState.gameSentences[gameState.sentenceNumber][index]];
           [...word].forEach((letter, index) => {
             if (index >= correctText.length) {
               excessLetters++;
@@ -113,7 +113,7 @@
       // console.log("RAW:", rawWpm, "WPM:", wpm, "ACC:", accuracy, "EXCESS:", excessLetters, "ALLCORRECT:", allCorrectlyTypedLetters, "ALLTOTYPE:", allLettersToType);
       console.log("RAW:", rawWpm.toFixed(2), "WPM:", wpm.toFixed(2), "FINAL ACC:", (finalAccuracy * 100).toFixed(2) + "%");
 
-      client?.nextRound();
+      client?.nextSentence();
     }
 
     client?.sendTypingUpdate(currentInput);
@@ -131,11 +131,12 @@
 
     client.connect("scribe");
     client.on("connect", (msg) => {
-      if (msg.role == "scribe") client?.start(30); 
+      if (msg.role == "scribe") client?.start(1200); 
     });
 
     client.on("game_state", (msg) => {
         isPlaying = true;
+        updateGameState(msg);
     });
   });
 </script>
@@ -148,7 +149,7 @@
   {JSON.stringify(currentInput)}
 
   <div class="flex flex-col items-left justify-center gap-2 w-full max-w-[80ch] overflow-x-hidden h-[12ex] rounded bg-accent">
-    {#each gameState.gameSentences.entries().toArray().slice(Math.max(gameState.roundNumber-1,0), gameState.roundNumber+2) as all (all[0])}
+    {#each gameState.gameSentences.entries().toArray().slice(Math.max(gameState.sentenceNumber-1,0), gameState.sentenceNumber+2) as all (all[0])}
       {@const true_index = all[0]}
       {@const sentence = all[1]}
       <div
@@ -159,7 +160,7 @@
         <TypingViewer
           targetText={sentence}
           currentText={gameState.currentInput[true_index] || []}
-          active={true_index === gameState.roundNumber}
+          active={true_index === gameState.sentenceNumber}
         />
   
       </div>

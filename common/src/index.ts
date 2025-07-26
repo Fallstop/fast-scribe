@@ -30,7 +30,7 @@ export type Message =
       inPlay: true;
       currentState: GameState;
     }
-  | { type: "next_round" }
+  | { type: "next_sentence" }
   | { type: "words"; value: string[][] }
   | { type: "current_state"; value: string[] }
   | { type: "hello" };

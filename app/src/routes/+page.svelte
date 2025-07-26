@@ -6,7 +6,7 @@
   import { onMount } from "svelte";
   import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
   
-  import QrCode from "svelte-qrcode";
+	import { qr } from '@svelte-put/qr/svg';
 
   let gameId = "";
 
@@ -33,8 +33,16 @@
         <code class="bg-secondary p-1 rounded">{location?.origin}/{gameId}</code>
 
         <div class="flex items-center justify-center mt-4">
-          <div class="bg-white p-2 rounded">
-            <QrCode value="https://github.com/" />
+          <div class=" p-2 rounded w-sm">
+            <svg
+              use:qr={{
+                data: `${location?.origin}/${gameId}`,
+                shape: 'circle',
+                anchorInnerFill: 'white',
+                anchorOuterFill: 'white',
+                moduleFill: 'white',
+              }}
+            />
           </div>
         </div>
 

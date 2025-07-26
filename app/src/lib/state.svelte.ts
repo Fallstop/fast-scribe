@@ -1,11 +1,29 @@
+import type { MessageMap } from "common";
+
 export interface GameState {
     gameSentences: string[][];
-    roundNumber: number;
+    sentenceNumber: number;
     currentInput: string[][];
 }
 
 export let gameState = $state<GameState>({
     gameSentences: [],
-    roundNumber: 0,
+    sentenceNumber: 0,
     currentInput: [],
 });
+
+
+export function updateGameState(newState: MessageMap["game_state"]) {
+    let actualState = newState.inPlay ? newState.currentState : newState.lastRound;
+    if (!actualState) {
+        return;
+    }
+    
+    gameState.gameSentences = actualState.words;
+    gameState.sentenceNumber = actualState.sentenceNumber;
+    gameState.currentInput = actualState.currentState;
+}
+
+export function typingUpdate(currentInput: string[]) {
+    gameState.currentInput[gameState.sentenceNumber] = currentInput;
+}
