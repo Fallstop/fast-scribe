@@ -44,7 +44,7 @@ app.get(
         console.log(msg);
         switch (msg.type) {
           case "current_state":
-            session.updateState(msg.value);
+            session.updateSentence(msg.value, msg.sentenceNumber);
             break;
           case "connect":
             if (msg.role === "scribe") {
