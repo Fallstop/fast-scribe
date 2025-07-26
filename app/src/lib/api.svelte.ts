@@ -23,6 +23,12 @@ export function createGame(): string {
 }
 
 
+export function nextRound() {
+    // should be controlled by the server?
+    gameState.roundNumber += 1;
+}
+
+
 export async function joinGame(_gameId: string) {
     gameId = _gameId;
 
@@ -39,7 +45,6 @@ export async function joinGame(_gameId: string) {
     console.log(`Client ${clientId} joined game ${gameId}`);
 
     gameState.roundNumber = 0;
-    gameState.currentInput = [];
     gameState.gameSentences = [
         "This is a test sentence.".split(" "),
         "Another sentence to type.".split(" "),
@@ -54,9 +59,11 @@ export async function joinGame(_gameId: string) {
     ];
 }
 
+export async function sendTypingUpdate(newText: string[]) {
+}
 
 export async function typingUpdate(newText: string[]) {
-    gameState.currentInput = newText;
+    gameState.currentInput[gameState.roundNumber] = newText;
 }
 
 

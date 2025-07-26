@@ -1,7 +1,7 @@
 export interface GameState {
     gameSentences: string[][];
     roundNumber: number;
-    currentInput: string[];
+    currentInput: string[][];
 }
 
 export let gameState = $state<GameState>({
