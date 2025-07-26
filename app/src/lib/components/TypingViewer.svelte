@@ -96,7 +96,7 @@
 </script>
 
 <div
-  class="relative bg-secondary p-4 rounded-lg shadow-md text-2xl font-mono text-primary w-4xl"
+  class="relative font-mono"
   class:not-active={!active}>
  
   <span

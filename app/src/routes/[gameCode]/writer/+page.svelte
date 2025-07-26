@@ -4,10 +4,13 @@
   import { Input } from "$lib/components/ui/input";
   import TypingViewer from "$lib/components/TypingViewer.svelte";
   import { gameState } from "$lib/state.svelte";
-  import { joinGame, nextRound, typingUpdate } from "$lib/api.svelte";
+  import { joinGame, nextRound, sendTypingUpdate, typingUpdate } from "$lib/api.svelte";
   import { json } from "@sveltejs/kit";
-  const porps: PageProps = $props();
-  const gameCode = $derived(porps.params.gameCode);
+  import { receive, send } from "$lib/transistion";
+import { flip } from 'svelte/animate';
+
+  const props: PageProps = $props();
+  const gameCode = $derived(props.params.gameCode);
 
   // Keep track of the words. Space moves to the next word.
 
@@ -66,13 +69,26 @@
   <p class="mb-8">debug data: {JSON.stringify(gameState.currentInput)} </p>
   {JSON.stringify(currentInput)}
 
-  {#each gameState.gameSentences.slice(Math.max(gameState.roundNumber-1,0), gameState.roundNumber+2) as sentence, index}
-    <TypingViewer
-      targetText={sentence}
-      currentText={gameState.currentInput[gameState.roundNumber === 0 ? index  : index + gameState.roundNumber-1] || []}
-      active={index === 1 || index === 0 && gameState.roundNumber === 0}
-    />
-  {/each}
+  <div class="flex flex-col items-left justify-center gap-2 w-full max-w-[80ch] overflow-x-hidden h-[12ex] rounded bg-accent">
+    {#each gameState.gameSentences.entries().toArray().slice(Math.max(gameState.roundNumber-1,0), gameState.roundNumber+2) as all (all[0])}
+      {@const true_index = all[0]}
+      {@const sentence = all[1]}
+      <div
+          in:receive={{ key: true_index }}
+          out:send={{ key: true_index }}
+          animate:flip
+      >
+        <TypingViewer
+          targetText={sentence}
+          currentText={gameState.currentInput[true_index] || []}
+          active={true_index === gameState.roundNumber}
+        />
+  
+      </div>
+    {/each}
+
+  </div>
+
 
   <!-- <TypingViewer
     targetText={gameState.gameSentences[gameState.roundNumber] || []}
