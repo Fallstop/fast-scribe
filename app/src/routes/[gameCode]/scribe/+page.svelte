@@ -152,8 +152,6 @@
 
 <div class="flex flex-col items-center justify-center h-screen">
   <h1 class="text-3xl font-bold mb-4">Fast Scribe - Game Code: {gameCode}</h1>
-  <p class="mb-8">debug data: {JSON.stringify(gameState.currentInput)} </p>
-  {JSON.stringify(currentInput)}
 
   <div class="flex flex-col items-left justify-center gap-2 w-full max-w-[80ch] overflow-x-hidden h-[12ex] rounded bg-accent">
     {#each gameState.gameSentences.entries().toArray().slice(Math.max(gameState.sentenceNumber-1,0), gameState.sentenceNumber+2) as all (all[0])}
