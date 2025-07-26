@@ -41,6 +41,7 @@
 	"dependencies": {
 		"@sveltejs/adapter-cloudflare": "^7.1.1",
 		"sass-embedded": "^1.89.2",
-		"svelte-qrcode": "^1.0.1"
+		"svelte-qrcode": "^1.0.1",
+		"common": "workspace:*"
 	}
 }
