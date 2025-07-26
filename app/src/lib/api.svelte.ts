@@ -37,7 +37,7 @@ function generateClientId() {
 
 export async function createGame(): Promise<string> {
   // post to the server
-  let res = await fetch("http://" + PUBLIC_API_URL + "/create-room", {
+  let res = await fetch(`${location.protocol}//${PUBLIC_API_URL}/create-room`, {
     method: "POST",
   });
   const data = (await res.json()) as { roomCode: string };
