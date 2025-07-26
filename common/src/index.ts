@@ -6,5 +6,8 @@ type MapDiscriminatedUnion<T extends Record<K, string>, K extends keyof T> = {
   [V in T[K]]: DiscriminateUnion<T, K, V>;
 };
 
-export type Message = { type: "connect" } | { type: "keydown"; value: string };
+export type Message =
+  | { type: "connect" }
+  | { type: "disconnect" }
+  | { type: "keydown"; value: string };
 export type MessageMap = MapDiscriminatedUnion<Message, "type">;
