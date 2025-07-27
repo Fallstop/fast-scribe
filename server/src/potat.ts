@@ -10,7 +10,9 @@ const openai = new OpenAI({
   apiKey: env.OPEN_AI_KEY,
 });
 
-export const getSentences = async () =>
+const available: { sentences: string[][] }[] = [];
+
+const generateSentence = async () =>
   await openai.chat.completions
     .create({
       messages: [
@@ -20,7 +22,8 @@ export const getSentences = async () =>
             "Please fill out the list of sentences." +
             " Make sure that each sentence array contains strings with exactly one word." +
             " The sentences should be difficult and use words not commonly used in everyday speach" +
-            " There should be at least 5 sentences.",
+            " There should be at least 5 sentences." +
+            " The sentences should be arranged in increasing complexity, starting off with sentences that would be rear in everyday communication but not unheard of",
         },
       ],
       model: "gpt-4.1-nano",
@@ -56,7 +59,7 @@ export const getSentences = async () =>
           },
         },
       },
-      temperature: 1,
+      temperature: 0,
       top_p: 1,
       max_completion_tokens: 2048 * 3,
     })
@@ -66,3 +69,19 @@ export const getSentences = async () =>
           sentences: string[][];
         },
     );
+
+export const getSentences = async () => {
+  const sentences = available.pop();
+
+  if (sentences) {
+    generateSentence().then((result) => available.push(result));
+  }
+
+  return sentences ?? (await generateSentence());
+};
+
+for (let i = 0; i < 20; i++) {
+  generateSentence()
+    .then((result) => available.push(result))
+    .catch(console.error);
+}
