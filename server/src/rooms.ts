@@ -52,7 +52,8 @@ export const makeRoomManager = () => {
         startGame(duration: number) {
           room.startGame(id, duration);
         },
-        nextSentence() {
+        nextSentence(rawWpm: number, adjustedWpm: number, finalAccuracy: number) {
+          room.saveStats(rawWpm, adjustedWpm, finalAccuracy);
           room.nextSentence(id);
         },
         joinScribe() {
@@ -148,6 +149,17 @@ const makeRoom = (
 
       broadcast({ type: "current_state", value: currentState, sentenceNumber });
     },
+    saveStats(rawWpm: number, adjustedWpm: number, finalAccuracy: number) {
+      if (!gameState.inPlay || !scribe) {
+        return;
+      }
+
+      gameState.currentState.stats.push({
+        rawWpm,
+        adjustedWpm,
+        finalAccuracy,
+      });
+    },
     nextSentence: (connectionId: string) => {
       if (!gameState.inPlay || connectionId !== scribe) {
         return;
@@ -203,6 +215,7 @@ const makeRoom = (
             "RICK".split(" "),
             "yippee!".split(" "),
           ],
+          stats: [],
         },
       };
 

@@ -4,6 +4,11 @@
     targetText: string[];
     active: boolean;
     hideTruth?: boolean;
+    showStats?: {
+      rawWpm: number;
+      adjustedWpm: number;
+      finalAccuracy: number;
+    }
   }
 </script>
 
@@ -12,7 +17,7 @@
 
   import { Tween } from "svelte/motion";
 
-  const { currentText, targetText, active, hideTruth } = $props();
+  const { currentText, targetText, active, hideTruth, showStats } = $props();
 
   const combinedText = $derived<string[]>(
     targetText.map((word: string, wordIndex: number) => {
@@ -28,7 +33,7 @@
       currentText.length <= wordIndex ||
       currentText[wordIndex].length <= charIndex
     ) {
-      if (hideTruth) {
+      if (hideTruth && currentText.length  <= wordIndex+1) {
         return "hidden";
       } else {
         return "incomplete";
@@ -99,15 +104,16 @@
   }
 </script>
 
-<div class="relative font-mono" class:not-active={!active}>
+<div class="relative font-mono" >
   <span
     class="cursor"
     class:hidden={!active}
+    class:not-active={!active}
     style="transform: translateX({cursorPosition.current.x +
       1}ch) translateY({cursorPosition.current.y}ch);"
   ></span>
   {#each combinedText as word, wordIndex}
-    <span class="word">
+    <span class="word" class:not-active={!active}>
       {#each word.split("") as char, charIndex}
         <span class="char {decideClass(wordIndex, charIndex)}">
           {#if hideTruth}
@@ -123,6 +129,14 @@
       <span class="space"> </span>
     {/if}
   {/each}
+
+  {#if showStats}
+  <span class="float-right">
+    <span class="text-sm text-yellow-500 font-bold">
+      {Math.round(showStats.rawWpm)} wpm, {Math.round(showStats.finalAccuracy*100)}%
+    </span>
+  </span>
+  {/if}
 </div>
 
 <style lang="scss">
@@ -144,7 +158,7 @@
   .not-active {
     opacity: 0.5;
 
-    .cursor {
+    &.cursor {
       opacity: 0;
     }
   }

@@ -13,6 +13,11 @@ export type GameState = {
   endsIn: number;
   sentenceNumber: number;
   currentState: string[][];
+  stats: {
+    rawWpm: number;
+    adjustedWpm: number;
+    finalAccuracy: number;
+  }[];
 };
 
 export type Role = "dictator" | "scribe";

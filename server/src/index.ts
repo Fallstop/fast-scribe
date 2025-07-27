@@ -61,7 +61,7 @@ app.get(
             session.startGame(msg.duration);
             break;
           case "next_sentence":
-            session.nextSentence();
+            session.nextSentence(msg.raw, msg.wpm, msg.finalAccuracy);
             break;
           default:
             console.log("Unexpected message", msg);

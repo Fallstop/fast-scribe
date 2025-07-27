@@ -58,7 +58,6 @@
     <div class="flex flex-col items-center justify-center h-screen">
       <h1 class="text-3xl font-bold mb-4">Fast Scribe (Dictator view!)</h1>
       <p class="mb-8">debug data: {JSON.stringify(gameState.currentInput)}</p>
-      {JSON.stringify(currentInput)}
 
       <div
         class="flex flex-col items-left justify-center gap-2 w-full max-w-[80ch] overflow-x-hidden h-[12ex] rounded bg-accent"
@@ -79,6 +78,7 @@
               currentText={gameState.currentInput[true_index] || []}
               active={true_index === gameState.sentenceNumber}
               hideTruth={false}
+              showStats={gameState.stats[true_index] ?? undefined}
             />
           </div>
         {/each}
@@ -93,10 +93,12 @@
       </div>
     </div>
   {:else}
-    Waiting for start
+  <div class="w-full h-screen flex items-center justify-center">
+    <h1 class="text-2xl">Waiting for game to start</h1>
+  </div> 
   {/if}
 {:else}
-  <div class="w-full h-full flex items-center justify-center">
-    <h1>Watinig for game to start</h1>
+  <div class="w-full h-screen flex items-center justify-center">
+    <h1 class="text-2xl">Connecting to game server...</h1>
   </div>
 {/if}

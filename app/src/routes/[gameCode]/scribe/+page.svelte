@@ -179,7 +179,6 @@
 
 <div class="flex flex-col items-center justify-center h-screen">
   <h1 class="text-3xl font-bold mb-4">Fast Scribe - Game Code: {gameCode}</h1>
-
   <div
     class="flex flex-col items-left justify-center gap-2 w-full max-w-[80ch] overflow-x-hidden h-[12ex] rounded bg-accent"
   >
@@ -199,6 +198,7 @@
           currentText={gameState.currentInput[true_index] || []}
           active={true_index === gameState.sentenceNumber}
           hideTruth={true_index >= gameState.sentenceNumber}
+          showStats={gameState.stats[true_index]}
         />
       </div>
     {/each}
