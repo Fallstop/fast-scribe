@@ -12,16 +12,15 @@
 
   import { Tween } from "svelte/motion";
 
-
   const { currentText, targetText, active, hideTruth } = $props();
 
   const combinedText = $derived<string[]>(
-    (targetText).map((word: string, wordIndex: number) => {
+    targetText.map((word: string, wordIndex: number) => {
       const currentWord = currentText[wordIndex] || "";
       return word.length > currentWord.length
         ? word
         : word + currentWord.slice(word.length, currentWord.length);
-    })
+    }),
   );
 
   function decideClass(wordIndex: number, charIndex: number) {
@@ -63,7 +62,7 @@
     },
     {
       duration: 100,
-    }
+    },
   );
 
   $effect(() => {
@@ -73,7 +72,7 @@
 
   function getCursorPosition(
     targetText: string[],
-    currentText: string[]
+    currentText: string[],
   ): CursorPosition {
     if (currentText.length === 0) {
       return { x: 0, y: 0 };
@@ -90,7 +89,7 @@
     // calculate the distance covered
     combinedText.forEach((word, index) => {
       if (index < lastWordIndex) {
-        cursorPosition.x += word.length +1; // +1 for space
+        cursorPosition.x += word.length + 1; // +1 for space
       } else if (index === lastWordIndex) {
         cursorPosition.x += lastWord.length;
       }
@@ -100,14 +99,13 @@
   }
 </script>
 
-<div
-  class="relative font-mono"
-  class:not-active={!active}>
- 
+<div class="relative font-mono" class:not-active={!active}>
   <span
     class="cursor"
     class:hidden={!active}
-    style="transform: translateX({cursorPosition.current.x+1}ch) translateY({cursorPosition.current.y}ch);"></span>
+    style="transform: translateX({cursorPosition.current.x +
+      1}ch) translateY({cursorPosition.current.y}ch);"
+  ></span>
   {#each combinedText as word, wordIndex}
     <span class="word">
       {#each word.split("") as char, charIndex}
@@ -117,7 +115,6 @@
             {String.fromCharCode(97 + Math.floor(Math.random() * 26))}
           {:else}
             {char}
-
           {/if}
         </span>
       {/each}

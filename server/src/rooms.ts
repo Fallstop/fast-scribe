@@ -39,6 +39,8 @@ export const makeRoomManager = () => {
             room.clearInterval();
             rooms.delete(roomCode);
           }
+
+          console.log(rooms);
         },
         broadcast(message: Message) {
           room.broadcast(message, id);

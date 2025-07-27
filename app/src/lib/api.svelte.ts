@@ -47,7 +47,11 @@ export const createClient = async (gameCode: string) => {
       send({ type: "connect", role });
     },
     sendTypingUpdate(currentInput: string[], currentSentence: number) {
-      send({ type: "current_state", value: currentInput, sentenceNumber: currentSentence });
+      send({
+        type: "current_state",
+        value: currentInput,
+        sentenceNumber: currentSentence,
+      });
     },
     nextSentence(raw: number, wpm: number, finalAccuracy: number) {
       send({ type: "next_sentence", raw, wpm, finalAccuracy });

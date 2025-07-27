@@ -1,10 +1,9 @@
 <script lang="ts">
-	import '../app.css';
-	
-	let { children } = $props();
+  import "../app.css";
+
+  let { children } = $props();
 </script>
 
 <div class="min-h-screen bg">
-	{@render children()}
+  {@render children()}
 </div>
-
