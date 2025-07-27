@@ -54,6 +54,7 @@
   });
 </script>
 
+<svelte:head><title>Fast Scribe | Dictator</title></svelte:head>
 <svelte:body />
 
 {#if client}

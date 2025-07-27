@@ -15,6 +15,10 @@
   }
 </script>
 
+<svelte:head>
+  <title>Fast Scribe</title>
+</svelte:head>
+
 <div class="flex flex-col items-center justify-center h-screen">
   <h1 class="text-3xl font-bold mb-4">Fast Scribe</h1>
   <p class="mb-8">Can you out-write the timer?</p>

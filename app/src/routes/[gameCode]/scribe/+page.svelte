@@ -175,6 +175,10 @@
   });
 </script>
 
+<svelte:head>
+  <title>Fast Scribe | Scribe</title>
+</svelte:head>
+
 <svelte:body onkeydown={handleInput} />
 
 <div class="flex flex-col items-center justify-center h-screen">
