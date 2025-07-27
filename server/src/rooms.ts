@@ -1,5 +1,6 @@
 import { GameState, Message, MessageHandlers } from "common";
 import { randomUUID } from "crypto";
+import { getSentences } from "./potat";
 
 export const makeRoomManager = () => {
   const rooms = new Map<string, ReturnType<typeof makeRoom>>();
@@ -157,12 +158,22 @@ const makeRoom = (
 
       broadcast({ type: "game_state", ...gameState });
     },
-    startGame: (connectionId: string, duration: number) => {
+    startGame: async (connectionId: string, duration: number) => {
       if (gameState.inPlay || connectionId !== scribe) {
         return;
       }
 
       let now = new Date();
+      let words: string[][] | undefined;
+      try {
+        const obj = await getSentences();
+        words = obj.sentences;
+        console.log(words);
+      } catch (ex) {
+        console.error(ex);
+      }
+
+      console.log(words);
 
       gameState = {
         inPlay: true,
@@ -172,7 +183,7 @@ const makeRoom = (
           currentState: [[]],
           sentenceNumber: 0,
           started: now.getTime(),
-          words: [
+          words: words ?? [
             "This is a test sentence.".split(" "),
             "Another sentence to type.".split(" "),
             "Yet another sentence for testing.".split(" "),

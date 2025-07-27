@@ -6,9 +6,11 @@
   import { flip } from "svelte/animate";
   import { createClient, type WsClient } from "$lib/api.svelte";
   import { onMount } from "svelte";
+  import TimeRemainingText from "$lib/components/TimeRemainingText.svelte";
 
   const props: PageProps = $props();
   const gameCode = $derived(props.params.gameCode);
+  let endsAt = $state(0);
 
   let isPlaying = $state(false);
 
@@ -86,6 +88,9 @@
     targetText={gameState.gameSentences[gameState.roundNumber] || []}
     currentText={gameState.currentInput[gameState.roundNumber] || []}
   /> -->
+      <div>
+        <TimeRemainingText ends-at={endsAt} />
+      </div>
     </div>
   {:else}
     Waiting for start

@@ -22,7 +22,7 @@ export type Message =
   | { type: "role_taken" }
   | { type: "disconnect"; role: Role }
   | { type: "start_game"; duration: number }
-  | { type: "game_start"; startTime: number }
+  | { type: "game_start"; endsAt: number }
   | { type: "game_end_in"; in: number }
   | { type: "game_state"; inPlay: false; lastRound?: GameState }
   | {
@@ -30,9 +30,9 @@ export type Message =
       inPlay: true;
       currentState: GameState;
     }
-  | { type: "next_sentence"; raw: number, wpm: number, finalAccuracy: number}
+  | { type: "next_sentence"; raw: number; wpm: number; finalAccuracy: number }
   | { type: "words"; value: string[][] }
-  | { type: "current_state"; value: string[], sentenceNumber: number }
+  | { type: "current_state"; value: string[]; sentenceNumber: number }
   | { type: "hello" };
 
 export type MessageMap = MapDiscriminatedUnion<Message, "type">;
