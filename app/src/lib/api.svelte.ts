@@ -6,7 +6,7 @@ export type WsClient = ExtractPromise<ReturnType<typeof createClient>>;
 
 export const createGame = async () => {
   const res = await fetch(
-    `${window.location.protocol}//${PUBLIC_API_URL}/create-room`,
+    `${window?.location?.protocol}//${PUBLIC_API_URL}/create-room`,
     {
       method: "POST",
     },
@@ -17,7 +17,7 @@ export const createGame = async () => {
 
 export const createClient = async (gameCode: string) => {
   const socket = new WebSocket(
-    `${window.location.protocol}//${PUBLIC_API_URL}/ws/${gameCode}`,
+    `${window?.location?.protocol}//${PUBLIC_API_URL}/ws/${gameCode}`,
   );
   const handlers: MessageHandlers = {};
 

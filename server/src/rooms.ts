@@ -60,7 +60,7 @@ export const makeRoomManager = () => {
           return room.setScribe(id);
         },
         joinDictator() {
-          return room.setDictator(id);
+          return room.addDictator(id);
         },
       };
     },
@@ -76,7 +76,7 @@ const makeRoom = (
   connectionsMap: Map<string, MessageHandlers>,
 ) => {
   let connections: string[] = [];
-  let dictator: string | undefined;
+  let dictators: string[] = [];
   let scribe: string | undefined;
   let gameState = {
     inPlay: false,
@@ -105,9 +105,10 @@ const makeRoom = (
         broadcast({ type: "disconnect", role: "scribe" });
       }
 
-      if (dictator === connectionId) {
+      if (dictators.includes(connectionId)) {
         broadcast({ type: "disconnect", role: "dictator" });
-        dictator = undefined;
+        dictators = dictators.filter((x) => x !== connectionId);
+        broadcast({ type: "game_state", ...gameState });
       }
     },
     getConnections: () => connections,
@@ -116,11 +117,11 @@ const makeRoom = (
     ),
     getRoomId: () => roomId,
     getSize: () => connections.length,
-    setDictator: (connectionId: string) => {
-      if (dictator !== undefined) {
-        return false;
+    addDictator: (connectionId: string) => {
+      if (dictators.includes(connectionId)) {
+        return true;
       }
-      dictator = connectionId;
+      dictators.push(connectionId);
       broadcast({ type: "connect", role: "dictator" }, connectionId);
       broadcast({ type: "game_state", ...gameState });
 

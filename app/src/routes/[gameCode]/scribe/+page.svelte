@@ -9,10 +9,13 @@
   import { createClient, type WsClient } from "$lib/api.svelte";
   import { goto } from "$app/navigation";
   import TimeRemainingText from "$lib/components/TimeRemainingText.svelte";
+    import { qr } from "@svelte-put/qr/svg";
 
   const props: PageProps = $props();
   const gameCode = $derived(props.params.gameCode);
   let endsAt = $state(0);
+
+  let gameLink = "";
 
   let isPlaying = $state(false);
 
@@ -153,6 +156,8 @@
   onMount(async () => {
     // Initialize game state for the specific game code
     createClient(gameCode).then((conn) => (client = conn));
+
+    gameLink = `${window?.location?.origin}/${gameCode}`;
   });
 
   $effect(() => {
@@ -180,8 +185,27 @@
 </svelte:head>
 
 <svelte:body onkeydown={handleInput} />
+<div class="absolute top-0 right-0 flex flex-col items-end justify-center p-4">
+  
+  <p class="text-align-center font-bold">Join the game! <code class="bg-secondary p-1 rounded ml-2">{gameLink}/{gameCode}</code></p>
+    <div class="flex items-center justify-center mt-4">
+    <div class="rounded w-40 ">
+      <svg
+        use:qr={{
+          data: `${gameLink}/${gameCode}`,
+          shape: "circle",
+          anchorInnerFill: "white",
+          anchorOuterFill: "white",
+          moduleFill: "white",
+        }}
+      />
+    </div>
+  </div>
+
+</div>
 
 <div class="flex flex-col items-center justify-center h-screen">
+
   <h1 class="text-3xl font-bold mb-4">Fast Scribe - Game Code: {gameCode}</h1>
   <div
     class="flex flex-col items-left justify-center gap-2 w-full max-w-[80ch] overflow-x-hidden h-[12ex] rounded bg-accent"
