@@ -43,6 +43,9 @@
       updateGameState(msg);
 
       isPlaying = msg.inPlay;
+      if (msg.inPlay) {
+        endsAt = msg.currentState.endsAt;
+      }
     });
 
     client.on("current_state", (msg) => {
