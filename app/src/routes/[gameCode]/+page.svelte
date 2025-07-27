@@ -57,8 +57,6 @@
   {#if isPlaying}
     <div class="flex flex-col items-center justify-center h-screen">
       <h1 class="text-3xl font-bold mb-4">Fast Scribe (Dictator view!)</h1>
-      <p class="mb-8">debug data: {JSON.stringify(gameState.currentInput)}</p>
-
       <div
         class="flex flex-col items-left justify-center gap-2 w-full max-w-[80ch] overflow-x-hidden h-[12ex] rounded bg-accent"
       >
@@ -93,9 +91,9 @@
       </div>
     </div>
   {:else}
-  <div class="w-full h-screen flex items-center justify-center">
-    <h1 class="text-2xl">Waiting for game to start</h1>
-  </div> 
+    <div class="w-full h-screen flex items-center justify-center">
+      <h1 class="text-2xl">Waiting for game to start</h1>
+    </div>
   {/if}
 {:else}
   <div class="w-full h-screen flex items-center justify-center">
