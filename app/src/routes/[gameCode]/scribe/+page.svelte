@@ -45,6 +45,8 @@
     const key = event.key;
     // console.log("Key pressed:", key);
 
+    let moveToNextSentence = false;
+
     if (
       currentInput.length == 0 ||
       (currentInput.length == 1 &&
@@ -57,7 +59,8 @@
       // Move to the next word, if the current word is not empty
       if (
         currentInput.length > 0 &&
-        currentInput[currentInput.length - 1].length > 0
+        currentInput[currentInput.length - 1].length > 0 &&
+        currentInput.length < gameState.gameSentences[gameState.sentenceNumber].length
       ) {
         currentInput.push("");
       }
@@ -67,6 +70,17 @@
         currentInput.push("");
       }
       currentInput[currentInput.length - 1] += key;
+
+      // Check for last word correct completion
+      if (
+        currentInput.length == gameState.gameSentences[gameState.sentenceNumber].length &&
+        currentInput[currentInput.length - 1].length == gameState.gameSentences[gameState.sentenceNumber][currentInput.length - 1].length &&
+        currentInput[currentInput.length - 1] === gameState.gameSentences[gameState.sentenceNumber][currentInput.length - 1]
+
+      ) {
+        moveToNextSentence = true;
+      }
+  
     } else if (key === "Backspace") {
       // Remove last full word if control is pressed
       if (event.ctrlKey) {
@@ -95,7 +109,7 @@
 
     client?.sendTypingUpdate(currentInput, gameState.sentenceNumber);
 
-    if (key === "Enter") {
+    if (key === "Enter" || moveToNextSentence) {
       let time = endTimer();
 
       let lettersInCorrectlyTypedWords = 0; // MonkeyType-style WPM
